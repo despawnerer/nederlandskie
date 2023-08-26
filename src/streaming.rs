@@ -69,7 +69,7 @@ async fn extract_post_operations(commit: &Commit) -> Result<Vec<PostOperation>> 
             continue;
         }
 
-        let cid = op.cid.expect("cid is not there, what").to_string();
+        let cid = op.cid.ok_or(anyhow!("cid is not there, how is that possible"))?.to_string();
 
         if let Some((_, item)) = items.iter().find(|(cid, _)| Some(*cid) == op.cid) {
             let record: Record = ciborium::from_reader(&mut item.as_slice())?;
