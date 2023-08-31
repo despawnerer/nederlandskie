@@ -6,12 +6,14 @@ Heavily WIP. Doesn't work yet at all, but does read the stream of posts as they 
 
 ## Roadmap
 
-- [x] Reading stream of posts from Bluesky
-- [ ] Storing posts and profiles in the database
-- [ ] Detecting the country of residence from profile information
-- [ ] Serving the feed
-- [ ] Publishing the feed
-- [ ] Handling deleting of posts
+- [x] Read stream of posts from Bluesky
+- [x] Store posts in the database
+- [ ] Store user profiles in the database
+- [ ] Detect the country of residence from profile information
+- [ ] Keep subscription state to not lose messages
+- [ ] Serve the feed
+- [ ] Publish the feed
+- [ ] Handle deleting of posts
 
 ## Running
 
