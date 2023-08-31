@@ -2,15 +2,13 @@ mod database;
 mod frames;
 mod streaming;
 
-use crate::database::ConnectionPool;
 use anyhow::Result;
 use async_trait::async_trait;
-use database::{insert_post, insert_profile_if_it_doesnt_exist};
 
-use streaming::{Operation, OperationProcessor};
-
-use crate::database::make_connection_pool;
-use crate::streaming::start_processing_operations_with;
+use crate::database::{
+    insert_post, insert_profile_if_it_doesnt_exist, make_connection_pool, ConnectionPool,
+};
+use crate::streaming::{start_processing_operations_with, Operation, OperationProcessor};
 
 #[tokio::main]
 async fn main() -> Result<()> {
