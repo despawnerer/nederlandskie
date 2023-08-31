@@ -1,3 +1,6 @@
+use std::collections::HashSet;
+
+use async_trait::async_trait;
 use anyhow::Result;
 
 use crate::frames::Frame;
@@ -8,12 +11,31 @@ use atrium_api::com::atproto::sync::subscribe_repos::Message;
 use futures::StreamExt;
 use tokio_tungstenite::{connect_async, tungstenite};
 
-pub async fn start_stream() -> Result<()> {
+#[async_trait]
+pub trait OperationProcessor {
+    async fn process_operation(&self, operation: &Operation) -> Result<()>;
+}
+
+#[derive(Debug)]
+pub enum Operation {
+    CreatePost {
+        author_did: String,
+        cid: String,
+        uri: String,
+        languages: HashSet<String>,
+        text: String,
+    },
+    DeletePost {
+        uri: String,
+    },
+}
+
+pub async fn start_processing_operations_with<P: OperationProcessor>(processor: P) -> Result<()> {
     let (mut stream, _) =
         connect_async("wss://bsky.social/xrpc/com.atproto.sync.subscribeRepos").await?;
 
     while let Some(Ok(tungstenite::Message::Binary(message))) = stream.next().await {
-        if let Err(e) = handle_message(&message).await {
+        if let Err(e) = handle_message(&message, &processor).await {
             println!("Error handling a message: {:?}", e);
         }
     }
@@ -21,15 +43,15 @@ pub async fn start_stream() -> Result<()> {
     Ok(())
 }
 
-async fn handle_message(message: &[u8]) -> Result<()> {
+async fn handle_message<P: OperationProcessor>(message: &[u8], processor: &P) -> Result<()> {
     let commit = match parse_commit_from_message(&message)? {
         Some(commit) => commit,
         None => return Ok(()),
     };
 
-    let post_operations = extract_post_operations(&commit).await?;
+    let post_operations = extract_operations(&commit).await?;
     for operation in &post_operations {
-        println!("{:?}", operation);
+        processor.process_operation(&operation).await?;
     }
 
     Ok(())
@@ -45,21 +67,7 @@ fn parse_commit_from_message(message: &[u8]) -> Result<Option<Commit>> {
     }
 }
 
-#[derive(Debug)]
-enum PostOperation {
-    Create {
-        author_did: String,
-        cid: String,
-        uri: String,
-        languages: Vec<String>,
-        text: String,
-    },
-    Delete {
-        cid: String,
-    },
-}
-
-async fn extract_post_operations(commit: &Commit) -> Result<Vec<PostOperation>> {
+async fn extract_operations(commit: &Commit) -> Result<Vec<Operation>> {
     let mut operations = Vec::new();
 
     let (items, _) = rs_car::car_read_all(&mut commit.blocks.as_slice(), true).await?;
@@ -69,20 +77,20 @@ async fn extract_post_operations(commit: &Commit) -> Result<Vec<PostOperation>> 
             continue;
         }
 
-        let cid = op.cid.ok_or(anyhow!("cid is not there, how is that possible"))?.to_string();
+        let uri = format!("at://{}/{}", commit.repo, op.path);
 
         if let Some((_, item)) = items.iter().find(|(cid, _)| Some(*cid) == op.cid) {
             let record: Record = ciborium::from_reader(&mut item.as_slice())?;
 
             operations.push(match op.action.as_str() {
-                "create" => PostOperation::Create {
-                    languages: record.langs.unwrap_or_else(Vec::new),
+                "create" => Operation::CreatePost {
+                    languages: record.langs.unwrap_or_else(Vec::new).iter().cloned().collect(),
                     text: record.text,
                     author_did: commit.repo.clone(),
-                    cid,
-                    uri: format!("at://{}/{}", commit.repo, op.path),
+                    cid: op.cid.ok_or(anyhow!("cid is not present for a post create operation, how is that possible"))?.to_string(),
+                    uri,
                 },
-                "delete" => PostOperation::Delete { cid },
+                "delete" => Operation::DeletePost { uri },
                 _ => unreachable!(),
             });
         }
