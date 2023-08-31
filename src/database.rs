@@ -30,8 +30,8 @@ pub async fn make_connection_pool() -> Result<ConnectionPool> {
     // TODO: get options from env vars
     Ok(PgPoolOptions::new()
         .max_connections(5)
-        .connect("postgres://postgres:password@localhost/nederlandskie").await?)
-
+        .connect("postgres://postgres:password@localhost/nederlandskie")
+        .await?)
 }
 
 pub async fn insert_post(
@@ -45,7 +45,12 @@ pub async fn insert_post(
     Ok(query(
         &insert_into("Post")
             .columns(("indexed_at", "author_did", "cid", "uri"))
-            .values([["now()".to_owned(), params.next(), params.next(), params.next()]])
+            .values([[
+                "now()".to_owned(),
+                params.next(),
+                params.next(),
+                params.next(),
+            ]])
             .to_string(),
     )
     .bind(author_did)

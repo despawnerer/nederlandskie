@@ -43,7 +43,7 @@ impl OperationProcessor for PostSaver {
             } => {
                 // TODO: Configure this via env vars
                 if !languages.contains("ru") {
-                    return Ok(())
+                    return Ok(());
                 }
 
                 // BlueSky gets confused a lot about Russian vs Ukrainian, so skip posts

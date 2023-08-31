@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
-use async_trait::async_trait;
 use anyhow::Result;
+use async_trait::async_trait;
 
 use crate::frames::Frame;
 use anyhow::anyhow;
@@ -84,10 +84,20 @@ async fn extract_operations(commit: &Commit) -> Result<Vec<Operation>> {
 
             operations.push(match op.action.as_str() {
                 "create" => Operation::CreatePost {
-                    languages: record.langs.unwrap_or_else(Vec::new).iter().cloned().collect(),
+                    languages: record
+                        .langs
+                        .unwrap_or_else(Vec::new)
+                        .iter()
+                        .cloned()
+                        .collect(),
                     text: record.text,
                     author_did: commit.repo.clone(),
-                    cid: op.cid.ok_or(anyhow!("cid is not present for a post create operation, how is that possible"))?.to_string(),
+                    cid: op
+                        .cid
+                        .ok_or(anyhow!(
+                            "cid is not present for a post create operation, how is that possible"
+                        ))?
+                        .to_string(),
                     uri,
                 },
                 "delete" => Operation::DeletePost { uri },
