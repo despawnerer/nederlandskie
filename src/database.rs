@@ -44,13 +44,8 @@ pub async fn insert_post(
 
     Ok(query(
         &insert_into("Post")
-            .columns(("indexed_at", "author_did", "cid", "uri"))
-            .values([[
-                "now()".to_owned(),
-                params.next(),
-                params.next(),
-                params.next(),
-            ]])
+            .columns(("author_did", "cid", "uri"))
+            .values([params.next_array()])
             .to_string(),
     )
     .bind(author_did)
@@ -59,4 +54,21 @@ pub async fn insert_post(
     .execute(db)
     .await
     .map(|_| ())?)
+}
+
+pub async fn insert_profile_if_it_doesnt_exist(db: &ConnectionPool, did: &str) -> Result<bool> {
+    let mut params = Parameters::new();
+
+    Ok(query(
+        &insert_into("Profile")
+            .columns(("did",))
+            .values([params.next()])
+            .on_conflict()
+            .do_nothing()
+            .to_string(),
+    )
+    .bind(did)
+    .execute(db)
+    .await
+    .map(|result| result.rows_affected() > 0)?)
 }

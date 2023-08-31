@@ -5,7 +5,7 @@ mod streaming;
 use crate::database::ConnectionPool;
 use anyhow::Result;
 use async_trait::async_trait;
-use database::insert_post;
+use database::{insert_post, insert_profile_if_it_doesnt_exist};
 
 use streaming::{Operation, OperationProcessor};
 
@@ -55,12 +55,12 @@ impl OperationProcessor for PostSaver {
 
                 println!("received insertable post from {author_did}: {text}");
 
+                insert_profile_if_it_doesnt_exist(&self.db_connection_pool, &author_did).await?;
                 insert_post(&self.db_connection_pool, &author_did, &cid, &uri).await?;
-
-                // TODO: Insert profile if it doesn't exist yet
-                // insert_profile_if_it_doesnt_exist(&self.db_connection_pool, &author_did).await?;
             }
-            Operation::DeletePost { uri: _ } => {
+            Operation::DeletePost { uri } => {
+                println!("received a post do delete: {uri}");
+
                 // TODO: Delete posts from db
                 // delete_post(&self.db_connection_pool, &uri).await?;
             }
