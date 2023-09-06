@@ -1,7 +1,11 @@
+mod ai;
 mod database;
 mod frames;
+mod profile_classifying;
 mod streaming;
 
+use crate::profile_classifying::classify_unclassified_profiles;
+use ai::make_ai_client;
 use anyhow::Result;
 use async_trait::async_trait;
 
@@ -13,13 +17,19 @@ use crate::streaming::{start_processing_operations_with, Operation, OperationPro
 #[tokio::main]
 async fn main() -> Result<()> {
     let db_connection_pool = make_connection_pool().await?;
+    let ai_client = make_ai_client();
 
     // FIXME: This struct shouldn't really exist, but I couldn't find a way to replace
     // this whole nonsense with a closure, which is what this whole thing should be in
     // first place.
-    let post_saver = PostSaver { db_connection_pool };
+    let post_saver = PostSaver {
+        db_connection_pool: db_connection_pool.clone(),
+    };
 
-    start_processing_operations_with(post_saver).await?;
+    tokio::try_join!(
+        start_processing_operations_with(post_saver),
+        classify_unclassified_profiles(db_connection_pool.clone(), ai_client)
+    )?;
 
     Ok(())
 }

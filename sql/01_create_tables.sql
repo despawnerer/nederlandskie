@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS Profile {
     id INT GENERATED ALWAYS AS IDENTITY,
     first_seen_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     did TEXT UNIQUE,
-    handle TEXT NULL DEFAULT NULL,
+    has_been_processed BOOLEAN DEFAULT FALSE,
     likely_country_of_living varchar(2) NULL DEFAULT NULL
 }
 
