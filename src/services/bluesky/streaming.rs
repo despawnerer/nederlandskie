@@ -3,13 +3,11 @@ use std::collections::HashSet;
 use anyhow::Result;
 use async_trait::async_trait;
 
-use crate::frames::Frame;
+use super::proto::Frame;
 use anyhow::anyhow;
 use atrium_api::app::bsky::feed::post::Record;
 use atrium_api::com::atproto::sync::subscribe_repos::Commit;
 use atrium_api::com::atproto::sync::subscribe_repos::Message;
-use futures::StreamExt;
-use tokio_tungstenite::{connect_async, tungstenite};
 
 #[async_trait]
 pub trait OperationProcessor {
@@ -30,20 +28,7 @@ pub enum Operation {
     },
 }
 
-pub async fn start_processing_operations_with<P: OperationProcessor>(processor: P) -> Result<()> {
-    let (mut stream, _) =
-        connect_async("wss://bsky.social/xrpc/com.atproto.sync.subscribeRepos").await?;
-
-    while let Some(Ok(tungstenite::Message::Binary(message))) = stream.next().await {
-        if let Err(e) = handle_message(&message, &processor).await {
-            println!("Error handling a message: {:?}", e);
-        }
-    }
-
-    Ok(())
-}
-
-async fn handle_message<P: OperationProcessor>(message: &[u8], processor: &P) -> Result<()> {
+pub async fn handle_message<P: OperationProcessor>(message: &[u8], processor: &P) -> Result<()> {
     let commit = match parse_commit_from_message(&message)? {
         Some(commit) => commit,
         None => return Ok(()),
