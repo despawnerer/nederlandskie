@@ -6,14 +6,14 @@ use crate::services::ai::AI;
 use crate::services::bluesky::Bluesky;
 use crate::services::database::Database;
 
-pub struct ProfileClassifier<'a, 'b, 'c> {
+pub struct ProfileClassifier<'a> {
     database: &'a Database,
-    ai: &'b AI,
-    bluesky: &'c Bluesky,
+    ai: &'a AI,
+    bluesky: &'a Bluesky,
 }
 
-impl<'a, 'b, 'c> ProfileClassifier<'a, 'b, 'c> {
-    pub fn new(database: &'a Database, ai: &'b AI, bluesky: &'c Bluesky) -> Self {
+impl<'a> ProfileClassifier<'a> {
+    pub fn new(database: &'a Database, ai: &'a AI, bluesky: &'a Bluesky) -> Self {
         Self {
             database,
             ai,
