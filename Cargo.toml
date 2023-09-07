@@ -13,6 +13,7 @@ atrium-xrpc = "0.4.0"
 chat-gpt-lib-rs = "0.2.1"
 chrono = "0.4.29"
 ciborium = "0.2.1"
+dotenv = "0.15.0"
 futures = "0.3.28"
 libipld-core = { version = "0.16.0", features = ["serde-codec"] }
 rs-car = "0.4.1"

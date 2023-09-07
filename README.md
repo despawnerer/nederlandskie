@@ -15,6 +15,13 @@ Heavily WIP. Doesn't work yet at all, but does read the stream of posts as they 
 - [ ] Publish the feed
 - [ ] Handle deleting of posts
 
+## Initial setup
+
+Copy `.env.example` into `.env` and set up the environment variables within:
+
+- `CHAT_GPT_API_KEY` for your ChatGPT key
+- `DATABASE_URL` for PostgreSQL credentials
+
 ## Running
 
 `cargo run`
