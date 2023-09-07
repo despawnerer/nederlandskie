@@ -282,9 +282,9 @@ dependencies = [
 
 [[package]]
 name = "chrono"
-version = "0.4.28"
+version = "0.4.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "95ed24df0632f708f5f6d8082675bef2596f7084dee3dd55f632290bf35bfe0f"
+checksum = "d87d9d13be47a5b7c3907137f1290b0459a7f80efb26be8c52afb11963bccb02"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
@@ -1785,9 +1785,9 @@ dependencies = [
 
 [[package]]
 name = "serde_ipld_dagcbor"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ace39c1b7526be78c755a4c698313f699cf44e62408c0029bf9ab9450fe836da"
+checksum = "74e4c1e1617be5feb2f03f629f8097f76b51373785a83a875453c2b04c880f4e"
 dependencies = [
  "cbor4ii",
  "cid",
