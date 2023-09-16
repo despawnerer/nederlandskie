@@ -4,25 +4,25 @@ use async_trait::async_trait;
 use crate::services::bluesky::{Bluesky, Operation, OperationProcessor};
 use crate::services::database::Database;
 
-pub struct PostSaver<'a> {
+pub struct PostIndexer<'a> {
     database: &'a Database,
     bluesky: &'a Bluesky,
 }
 
-impl<'a> PostSaver<'a> {
+impl<'a> PostIndexer<'a> {
     pub fn new(database: &'a Database, bluesky: &'a Bluesky) -> Self {
         Self { database, bluesky }
     }
 }
 
-impl<'a> PostSaver<'a> {
+impl<'a> PostIndexer<'a> {
     pub async fn start(&self) -> Result<()> {
         Ok(self.bluesky.subscribe_to_operations(self).await?)
     }
 }
 
 #[async_trait]
-impl<'a> OperationProcessor for PostSaver<'a> {
+impl<'a> OperationProcessor for PostIndexer<'a> {
     async fn process_operation(&self, operation: &Operation) -> Result<()> {
         match operation {
             Operation::CreatePost {
