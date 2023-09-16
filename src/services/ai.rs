@@ -23,7 +23,7 @@ impl AI {
                 Message {
                     role: Role::System,
                     // TODO: Lol, prompt injection much?
-                    content: "You are a tool that attempts to guess where a person is likely to be from based on their name and short bio. Please respond with two-letter country code only. Use lowercase letters.".to_string(),
+                    content: "You are a tool that attempts to guess where a person is likely to be from based on their name and short bio. Please respond with two-letter country code only. If unable to determine, say xx.".to_string(),
                 },
                 Message {
                     role: Role::User,
@@ -36,6 +36,6 @@ impl AI {
         let response = self.chat_gpt_client.chat(chat_input).await?;
 
         // TODO: Error handling?
-        return Ok(response.choices[0].message.content.clone());
+        return Ok(response.choices[0].message.content.to_lowercase());
     }
 }

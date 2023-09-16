@@ -1,32 +1,16 @@
+mod config;
 mod processes;
 mod services;
 
-use std::env;
-
 use anyhow::Result;
-use dotenv::dotenv;
 
+use crate::config::Config;
+use crate::processes::feed_server::FeedServer;
 use crate::processes::post_saver::PostSaver;
 use crate::processes::profile_classifier::ProfileClassifier;
 use crate::services::ai::AI;
 use crate::services::bluesky::Bluesky;
 use crate::services::database::Database;
-
-struct Config {
-    chat_gpt_api_key: String,
-    database_url: String,
-}
-
-impl Config {
-    fn load() -> Result<Self> {
-        dotenv()?;
-
-        Ok(Self {
-            chat_gpt_api_key: env::var("CHAT_GPT_API_KEY")?,
-            database_url: env::var("DATABASE_URL")?,
-        })
-    }
-}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -38,8 +22,13 @@ async fn main() -> Result<()> {
 
     let post_saver = PostSaver::new(&database, &bluesky);
     let profile_classifier = ProfileClassifier::new(&database, &ai, &bluesky);
+    let feed_server = FeedServer::new(&database, &config);
 
-    tokio::try_join!(post_saver.start(), profile_classifier.start())?;
+    tokio::try_join!(
+        post_saver.start(),
+        profile_classifier.start(),
+        feed_server.serve(),
+    )?;
 
     Ok(())
 }

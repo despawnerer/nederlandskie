@@ -21,6 +21,7 @@ Copy `.env.example` into `.env` and set up the environment variables within:
 
 - `CHAT_GPT_API_KEY` for your ChatGPT key
 - `DATABASE_URL` for PostgreSQL credentials
+- `HOSTNAME` to the hostname of where you intend to host the feed
 
 ## Running
 
