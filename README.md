@@ -11,7 +11,7 @@ Heavily WIP. Doesn't work yet at all, but does read the stream of posts as they 
 - [x] Store user profiles in the database
 - [x] Detect the country of residence from profile information
 - [ ] Keep subscription state to not lose messages
-- [ ] Serve the feed
+- [x] Serve the feed
 - [ ] Publish the feed
 - [ ] Handle deleting of posts
 
