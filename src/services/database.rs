@@ -1,6 +1,6 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
-use scooby::postgres::{insert_into, select, update, Joinable, Orderable, Parameters, Aliasable};
+use scooby::postgres::{insert_into, select, update, Aliasable, Joinable, Orderable, Parameters};
 use sqlx::postgres::{PgPool, PgPoolOptions, PgRow};
 use sqlx::query;
 use sqlx::Row;
@@ -62,7 +62,8 @@ impl Database {
         let mut params = Parameters::new();
         let mut sql_builder = select(("p.indexed_at", "p.author_did", "p.cid", "p.uri"))
             .from(
-                "Post".as_("p")
+                "Post"
+                    .as_("p")
                     .inner_join("Profile".as_("pr"))
                     .on("pr.did = p.author_did"),
             )
@@ -78,8 +79,7 @@ impl Database {
 
         let sql_string = sql_builder.to_string();
 
-        let mut query_object = query(&sql_string)
-            .bind(author_country);
+        let mut query_object = query(&sql_string).bind(author_country);
 
         if let Some((last_indexed_at, last_cid)) = earlier_than {
             query_object = query_object.bind(last_indexed_at).bind(last_cid);

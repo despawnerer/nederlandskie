@@ -11,7 +11,10 @@ pub async fn describe_feed_generator(
     Json(FeedGeneratorDescription {
         did: state.config.service_did.clone(),
         feeds: vec![Feed {
-            uri: format!("at://{}/app.bsky.feed.generator/{}", state.config.publisher_did, "nederlandskie"),
+            uri: format!(
+                "at://{}/app.bsky.feed.generator/{}",
+                state.config.publisher_did, "nederlandskie"
+            ),
         }],
         links: None,
     })
