@@ -5,7 +5,7 @@ use axum::routing::get;
 use axum::{Router, Server};
 
 use crate::config::Config;
-use crate::services::database::Database;
+use crate::services::Database;
 
 use super::endpoints::{describe_feed_generator, did_json, get_feed_skeleton, root};
 use super::state::FeedServerState;

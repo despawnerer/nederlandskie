@@ -2,7 +2,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 
 use crate::services::bluesky::{Bluesky, Operation, OperationProcessor};
-use crate::services::database::Database;
+use crate::services::Database;
 
 pub struct PostIndexer<'a> {
     database: &'a Database,

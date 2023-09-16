@@ -5,12 +5,12 @@ mod services;
 use anyhow::Result;
 
 use crate::config::Config;
-use crate::processes::feed_server::FeedServer;
-use crate::processes::post_indexer::PostIndexer;
-use crate::processes::profile_classifier::ProfileClassifier;
-use crate::services::ai::AI;
-use crate::services::bluesky::Bluesky;
-use crate::services::database::Database;
+use crate::processes::FeedServer;
+use crate::processes::PostIndexer;
+use crate::processes::ProfileClassifier;
+use crate::services::AI;
+use crate::services::Bluesky;
+use crate::services::Database;
 
 #[tokio::main]
 async fn main() -> Result<()> {

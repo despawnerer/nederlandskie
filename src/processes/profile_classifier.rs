@@ -2,9 +2,9 @@ use std::time::Duration;
 
 use anyhow::Result;
 
-use crate::services::ai::AI;
-use crate::services::bluesky::Bluesky;
-use crate::services::database::Database;
+use crate::services::AI;
+use crate::services::Bluesky;
+use crate::services::Database;
 
 pub struct ProfileClassifier<'a> {
     database: &'a Database,

@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::services::database::Database;
+use crate::services::Database;
 
 #[derive(Clone)]
 pub struct FeedServerState {
