@@ -12,7 +12,7 @@ atrium-api = "0.6.0"
 atrium-xrpc = "0.4.0"
 axum = "0.6.20"
 chat-gpt-lib-rs = "0.2.1"
-chrono = "0.4.29"
+chrono = "0.4.31"
 ciborium = "0.2.1"
 dotenv = "0.15.0"
 futures = "0.3.28"
@@ -20,7 +20,7 @@ libipld-core = { version = "0.16.0", features = ["serde-codec"] }
 rs-car = "0.4.1"
 scooby = "0.5.0"
 serde = "1.0.188"
-serde_ipld_dagcbor = "0.4.1"
+serde_ipld_dagcbor = "0.4.2"
 sqlx = { version = "0.7.1", default-features = false, features = ["postgres", "runtime-tokio-native-tls", "chrono"] }
 tokio = { version = "1.32.0", features = ["full"] }
 tokio-tungstenite = { version = "0.20.0", features = ["native-tls"] }
