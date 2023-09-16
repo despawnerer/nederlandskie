@@ -1303,6 +1303,7 @@ dependencies = [
  "dotenv",
  "futures",
  "libipld-core",
+ "once_cell",
  "rs-car",
  "scooby",
  "serde",

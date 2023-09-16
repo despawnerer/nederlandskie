@@ -7,13 +7,18 @@ use axum::extract::{Query, State};
 use axum::Json;
 use chrono::{DateTime, TimeZone, Utc};
 
+use crate::algos;
 use crate::processes::feed_server::state::FeedServerState;
 
 pub async fn get_feed_skeleton(
     State(state): State<FeedServerState>,
     query: Query<FeedSkeletonQuery>,
 ) -> Json<FeedSkeleton> {
-    let limit = query.limit.unwrap_or(20) as usize;
+    let algo = algos::get_by_name(&query.feed)
+        .ok_or_else(|| anyhow!("Feed {} not found", query.feed))
+        .unwrap(); // TODO: handle error
+
+    let limit = query.limit.unwrap_or(20);
     let earlier_than = query
         .cursor
         .as_deref()
@@ -21,11 +26,10 @@ pub async fn get_feed_skeleton(
         .transpose()
         .unwrap(); // TODO: handle error
 
-    let posts = state
-        .database
-        .fetch_posts_by_authors_country("ru", limit, earlier_than)
+    let posts = algo
+        .fetch_posts(&state.database, limit, earlier_than)
         .await
-        .unwrap();
+        .unwrap(); // TODO: handle error
 
     let feed = posts
         .iter()

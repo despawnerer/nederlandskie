@@ -1,6 +1,7 @@
 use anyhow::Result;
 use async_trait::async_trait;
 
+use crate::algos;
 use crate::services::bluesky::{Bluesky, Operation, OperationProcessor};
 use crate::services::Database;
 
@@ -32,24 +33,14 @@ impl<'a> OperationProcessor for PostIndexer<'a> {
                 languages,
                 text,
             } => {
-                // TODO: Configure this via env vars
-                if !languages.contains("ru") {
-                    return Ok(());
+                if algos::iter_all().any(|a| a.should_index_post(author_did, languages, text)) {
+                    println!("received insertable post from {author_did}: {text}");
+
+                    self.database
+                        .insert_profile_if_it_doesnt_exist(&author_did)
+                        .await?;
+                    self.database.insert_post(&author_did, &cid, &uri).await?;
                 }
-
-                // BlueSky gets confused a lot about Russian vs Ukrainian, so skip posts
-                // that may be in Ukrainian regardless of whether Russian is in the list
-                // TODO: Configure this via env vars
-                if languages.contains("uk") {
-                    return Ok(());
-                }
-
-                println!("received insertable post from {author_did}: {text}");
-
-                self.database
-                    .insert_profile_if_it_doesnt_exist(&author_did)
-                    .await?;
-                self.database.insert_post(&author_did, &cid, &uri).await?;
             }
             Operation::DeletePost { uri } => {
                 println!("received a post do delete: {uri}");

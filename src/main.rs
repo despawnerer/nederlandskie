@@ -1,3 +1,4 @@
+mod algos;
 mod config;
 mod processes;
 mod services;
@@ -8,9 +9,9 @@ use crate::config::Config;
 use crate::processes::FeedServer;
 use crate::processes::PostIndexer;
 use crate::processes::ProfileClassifier;
-use crate::services::AI;
 use crate::services::Bluesky;
 use crate::services::Database;
+use crate::services::AI;
 
 #[tokio::main]
 async fn main() -> Result<()> {
