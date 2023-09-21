@@ -1,7 +1,4 @@
-mod algos;
-mod config;
-mod processes;
-mod services;
+extern crate nederlandskie;
 
 use std::sync::Arc;
 
@@ -10,15 +7,10 @@ use env_logger::Env;
 use lingua::LanguageDetectorBuilder;
 use log::info;
 
-use crate::algos::AlgosBuilder;
-use crate::algos::Nederlandskie;
-use crate::config::Config;
-use crate::processes::FeedServer;
-use crate::processes::PostIndexer;
-use crate::processes::ProfileClassifier;
-use crate::services::Bluesky;
-use crate::services::Database;
-use crate::services::AI;
+use nederlandskie::algos::{AlgosBuilder, Nederlandskie};
+use nederlandskie::config::Config;
+use nederlandskie::processes::{FeedServer, PostIndexer, ProfileClassifier};
+use nederlandskie::services::{Bluesky, Database, AI};
 
 #[tokio::main]
 async fn main() -> Result<()> {
