@@ -65,17 +65,18 @@ impl OperationProcessor for PostIndexer {
                 languages,
                 text,
             } => {
-                if self
-                    .algos
-                    .iter_all()
-                    .any(|a| a.should_index_post(author_did, languages, text))
-                {
-                    info!("Received insertable post from {author_did}: {text}");
+                for algo in self.algos.iter_all() {
+                    if algo.should_index_post(author_did, languages, text).await? {
+                        info!("Received insertable post from {author_did}: {text}");
 
-                    self.database
-                        .insert_profile_if_it_doesnt_exist(&author_did)
-                        .await?;
-                    self.database.insert_post(&author_did, &cid, &uri).await?;
+                        self.database
+                            .insert_profile_if_it_doesnt_exist(&author_did)
+                            .await?;
+
+                        self.database.insert_post(&author_did, &cid, &uri).await?;
+
+                        break;
+                    }
                 }
             }
             Operation::DeletePost { uri } => {

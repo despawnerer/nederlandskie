@@ -24,13 +24,13 @@ impl Nederlandskie {
 /// An algorithm that serves posts written in Russian by people living in Netherlands
 #[async_trait]
 impl Algo for Nederlandskie {
-    fn should_index_post(
+    async fn should_index_post(
         &self,
         _author_did: &str,
         _languages: &HashSet<String>,
         text: &str,
-    ) -> bool {
-        self.language_detector.detect_language_of(text) == Some(Russian)
+    ) -> Result<bool> {
+        Ok(self.language_detector.detect_language_of(text) == Some(Russian))
     }
 
     async fn fetch_posts(

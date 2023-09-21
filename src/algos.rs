@@ -12,7 +12,12 @@ pub use self::nederlandskie::Nederlandskie;
 
 #[async_trait]
 pub trait Algo {
-    fn should_index_post(&self, author_did: &str, languages: &HashSet<String>, text: &str) -> bool;
+    async fn should_index_post(
+        &self,
+        author_did: &str,
+        languages: &HashSet<String>,
+        text: &str,
+    ) -> Result<bool>;
 
     async fn fetch_posts(
         &self,
