@@ -2,7 +2,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
-use log::info;
+use log::{error, info};
 
 use crate::services::Bluesky;
 use crate::services::Database;
@@ -37,13 +37,17 @@ impl ProfileClassifier {
         let dids = self.database.fetch_unprocessed_profile_dids().await?;
         if dids.is_empty() {
             info!("No profiles to process: waiting 10 seconds");
-            tokio::time::sleep(Duration::from_secs(10)).await;
         } else {
             info!("Classifying {} new profiles", dids.len());
             for did in &dids {
-                self.fill_in_profile_details(did).await?;
+                match self.fill_in_profile_details(did).await {
+                    Ok(()) => continue,
+                    Err(e) => error!("Could not classify profile: {:?}", e)
+                }
             }
         }
+
+        tokio::time::sleep(Duration::from_secs(10)).await;
 
         Ok(())
     }
