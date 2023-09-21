@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
@@ -6,14 +7,14 @@ use crate::services::Bluesky;
 use crate::services::Database;
 use crate::services::AI;
 
-pub struct ProfileClassifier<'a> {
-    database: &'a Database,
-    ai: &'a AI,
-    bluesky: &'a Bluesky,
+pub struct ProfileClassifier {
+    database: Arc<Database>,
+    ai: Arc<AI>,
+    bluesky: Arc<Bluesky>,
 }
 
-impl<'a> ProfileClassifier<'a> {
-    pub fn new(database: &'a Database, ai: &'a AI, bluesky: &'a Bluesky) -> Self {
+impl ProfileClassifier {
+    pub fn new(database: Arc<Database>, ai: Arc<AI>, bluesky: Arc<Bluesky>) -> Self {
         Self {
             database,
             ai,

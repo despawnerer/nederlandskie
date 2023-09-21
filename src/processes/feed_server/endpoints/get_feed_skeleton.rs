@@ -7,14 +7,15 @@ use axum::extract::{Query, State};
 use axum::Json;
 use chrono::{DateTime, TimeZone, Utc};
 
-use crate::algos;
 use crate::processes::feed_server::state::FeedServerState;
 
 pub async fn get_feed_skeleton(
     State(state): State<FeedServerState>,
     query: Query<FeedSkeletonQuery>,
 ) -> Json<FeedSkeleton> {
-    let algo = algos::get_by_name(&query.feed)
+    let algo = state
+        .algos
+        .get_by_name(&query.feed)
         .ok_or_else(|| anyhow!("Feed {} not found", query.feed))
         .unwrap(); // TODO: handle error
 

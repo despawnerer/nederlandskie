@@ -2,7 +2,6 @@ use anyhow::Result;
 use dotenv::dotenv;
 use std::env;
 
-#[derive(Clone)]
 pub struct Config {
     pub chat_gpt_api_key: String,
     pub database_url: String,

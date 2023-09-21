@@ -1,23 +1,30 @@
 use std::net::SocketAddr;
+use std::sync::Arc;
 
 use anyhow::Result;
 use axum::routing::get;
 use axum::{Router, Server};
 
+use crate::algos::Algos;
 use crate::config::Config;
 use crate::services::Database;
 
 use super::endpoints::{describe_feed_generator, did_json, get_feed_skeleton, root};
 use super::state::FeedServerState;
 
-pub struct FeedServer<'a> {
-    database: &'a Database,
-    config: &'a Config,
+pub struct FeedServer {
+    database: Arc<Database>,
+    config: Arc<Config>,
+    algos: Arc<Algos>,
 }
 
-impl<'a> FeedServer<'a> {
-    pub fn new(database: &'a Database, config: &'a Config) -> Self {
-        Self { database, config }
+impl FeedServer {
+    pub fn new(database: Arc<Database>, config: Arc<Config>, algos: Arc<Algos>) -> Self {
+        Self {
+            database,
+            config,
+            algos,
+        }
     }
 
     pub async fn serve(self) -> Result<()> {
@@ -33,8 +40,9 @@ impl<'a> FeedServer<'a> {
                 get(get_feed_skeleton),
             )
             .with_state(FeedServerState {
-                database: self.database.clone(),
-                config: self.config.clone(),
+                database: self.database,
+                config: self.config,
+                algos: self.algos,
             });
 
         let addr = SocketAddr::from(([127, 0, 0, 1], 3000));

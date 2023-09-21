@@ -24,7 +24,6 @@ pub struct SubscriptionState {
     cursor: i64,
 }
 
-#[derive(Clone)]
 pub struct Database {
     connection_pool: PgPool,
 }

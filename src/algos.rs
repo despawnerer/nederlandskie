@@ -5,11 +5,10 @@ use std::collections::{HashMap, HashSet};
 use anyhow::Result;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
-use once_cell::sync::Lazy;
 
 use crate::services::database::{Database, Post};
 
-use self::nederlandskie::Nederlandskie;
+pub use self::nederlandskie::Nederlandskie;
 
 #[async_trait]
 pub trait Algo {
@@ -24,22 +23,43 @@ pub trait Algo {
 }
 
 pub type AnyAlgo = Box<dyn Algo + Sync + Send>;
-pub type AlgosMap = HashMap<&'static str, AnyAlgo>;
+type AlgosMap = HashMap<String, AnyAlgo>;
 
-static ALL_ALGOS: Lazy<AlgosMap> = Lazy::new(|| {
-    let mut m = AlgosMap::new();
-    m.insert("nederlandskie", Box::new(Nederlandskie));
-    m
-});
-
-pub fn iter_names() -> impl Iterator<Item = &'static str> {
-    ALL_ALGOS.keys().map(|s| *s)
+pub struct Algos {
+    algos: AlgosMap,
 }
 
-pub fn iter_all() -> impl Iterator<Item = &'static AnyAlgo> {
-    ALL_ALGOS.values()
+impl Algos {
+    pub fn iter_names(&self) -> impl Iterator<Item = &str> {
+        self.algos.keys().map(String::as_str)
+    }
+
+    pub fn iter_all(&self) -> impl Iterator<Item = &AnyAlgo> {
+        self.algos.values()
+    }
+
+    pub fn get_by_name(&self, name: &str) -> Option<&AnyAlgo> {
+        self.algos.get(name)
+    }
 }
 
-pub fn get_by_name(name: &str) -> Option<&'static AnyAlgo> {
-    ALL_ALGOS.get(name)
+pub struct AlgosBuilder {
+    algos: AlgosMap,
+}
+
+impl AlgosBuilder {
+    pub fn new() -> Self {
+        Self {
+            algos: AlgosMap::new(),
+        }
+    }
+
+    pub fn add<T: Algo + Send + Sync + 'static>(mut self, name: &str, algo: T) -> Self {
+        self.algos.insert(name.to_owned(), Box::new(algo));
+        self
+    }
+
+    pub fn build(self) -> Algos {
+        Algos { algos: self.algos }
+    }
 }

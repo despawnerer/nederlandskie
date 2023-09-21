@@ -3,7 +3,6 @@ use atrium_api::app::bsky::feed::describe_feed_generator::{
 };
 use axum::{extract::State, Json};
 
-use crate::algos;
 use crate::processes::feed_server::state::FeedServerState;
 
 pub async fn describe_feed_generator(
@@ -11,7 +10,9 @@ pub async fn describe_feed_generator(
 ) -> Json<FeedGeneratorDescription> {
     Json(FeedGeneratorDescription {
         did: state.config.service_did.clone(),
-        feeds: algos::iter_names()
+        feeds: state
+            .algos
+            .iter_names()
             .map(|name| Feed {
                 uri: format!(
                     "at://{}/app.bsky.feed.generator/{}",

@@ -1,29 +1,36 @@
+use std::sync::Arc;
+
 use anyhow::Result;
 use async_trait::async_trait;
 
-use crate::algos;
+use crate::algos::Algos;
 use crate::services::bluesky::{Bluesky, Operation, OperationProcessor};
 use crate::services::Database;
 
-pub struct PostIndexer<'a> {
-    database: &'a Database,
-    bluesky: &'a Bluesky,
+pub struct PostIndexer {
+    database: Arc<Database>,
+    bluesky: Arc<Bluesky>,
+    algos: Arc<Algos>,
 }
 
-impl<'a> PostIndexer<'a> {
-    pub fn new(database: &'a Database, bluesky: &'a Bluesky) -> Self {
-        Self { database, bluesky }
+impl PostIndexer {
+    pub fn new(database: Arc<Database>, bluesky: Arc<Bluesky>, algos: Arc<Algos>) -> Self {
+        Self {
+            database,
+            bluesky,
+            algos,
+        }
     }
 }
 
-impl<'a> PostIndexer<'a> {
+impl PostIndexer {
     pub async fn start(&self) -> Result<()> {
         Ok(self.bluesky.subscribe_to_operations(self).await?)
     }
 }
 
 #[async_trait]
-impl<'a> OperationProcessor for PostIndexer<'a> {
+impl OperationProcessor for PostIndexer {
     async fn process_operation(&self, operation: &Operation) -> Result<()> {
         match operation {
             Operation::CreatePost {
@@ -33,7 +40,11 @@ impl<'a> OperationProcessor for PostIndexer<'a> {
                 languages,
                 text,
             } => {
-                if algos::iter_all().any(|a| a.should_index_post(author_did, languages, text)) {
+                if self
+                    .algos
+                    .iter_all()
+                    .any(|a| a.should_index_post(author_did, languages, text))
+                {
                     println!("received insertable post from {author_did}: {text}");
 
                     self.database
