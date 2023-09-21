@@ -3,8 +3,8 @@ use atrium_api::client::AtpServiceClient;
 use atrium_api::client::AtpServiceWrapper;
 use atrium_xrpc::client::reqwest::ReqwestClient;
 use futures::StreamExt;
-use tokio_tungstenite::{connect_async, tungstenite};
 use log::error;
+use tokio_tungstenite::{connect_async, tungstenite};
 
 use super::streaming::{handle_message, OperationProcessor};
 
@@ -54,9 +54,17 @@ impl Bluesky {
     pub async fn subscribe_to_operations<P: OperationProcessor>(
         &self,
         processor: &P,
+        cursor: Option<i32>,
     ) -> Result<()> {
-        let (mut stream, _) =
-            connect_async("wss://bsky.social/xrpc/com.atproto.sync.subscribeRepos").await?;
+        let url = match cursor {
+            Some(cursor) => format!(
+                "wss://bsky.social/xrpc/com.atproto.sync.subscribeRepos?cursor={}",
+                cursor
+            ),
+            None => "wss://bsky.social/xrpc/com.atproto.sync.subscribeRepos".to_owned(),
+        };
+
+        let (mut stream, _) = connect_async(url).await?;
 
         while let Some(Ok(tungstenite::Message::Binary(message))) = stream.next().await {
             if let Err(e) = handle_message(&message, processor).await {

@@ -19,11 +19,6 @@ pub struct Profile {
     likely_country_of_living: Option<String>,
 }
 
-pub struct SubscriptionState {
-    service: String,
-    cursor: i64,
-}
-
 pub struct Database {
     connection_pool: PgPool,
 }
@@ -139,6 +134,53 @@ impl Database {
                 .to_string(),
         )
         .bind(likely_country_of_living)
+        .bind(did)
+        .execute(&self.connection_pool)
+        .await
+        .map(|result| result.rows_affected() > 0)?)
+    }
+
+    pub async fn fetch_subscription_cursor(&self, did: &str) -> Result<Option<i32>> {
+        let mut params = Parameters::new();
+
+        Ok(query(
+            &select("cursor")
+                .from("SubscriptionState")
+                .where_(format!("service = {}", params.next()))
+                .to_string(),
+        )
+        .bind(did)
+        .map(|r: PgRow| r.get("cursor"))
+        .fetch_optional(&self.connection_pool)
+        .await?)
+    }
+
+    pub async fn create_subscription_state(&self, did: &str) -> Result<bool> {
+        let mut params = Parameters::new();
+
+        Ok(query(
+            &insert_into("SubscriptionState")
+                .columns(("service", "cursor"))
+                .values([params.next_array()])
+                .to_string(),
+        )
+        .bind(did)
+        .bind(0)
+        .execute(&self.connection_pool)
+        .await
+        .map(|result| result.rows_affected() > 0)?)
+    }
+
+    pub async fn update_subscription_cursor(&self, did: &str, cursor: i32) -> Result<bool> {
+        let mut params = Parameters::new();
+
+        Ok(query(
+            &update("SubscriptionState")
+                .set("cursor", params.next())
+                .where_(format!("service = {}", params.next()))
+                .to_string(),
+        )
+        .bind(cursor)
         .bind(did)
         .execute(&self.connection_pool)
         .await

@@ -13,3 +13,9 @@ CREATE TABLE IF NOT EXISTS Post (
     uri TEXT UNIQUE,
     author_did TEXT REFERENCES Profile(did)
 );
+
+CREATE TABLE IF NOT EXISTS SubscriptionState (
+    id INT GENERATED ALWAYS AS IDENTITY,
+    service TEXT UNIQUE,
+    cursor INT
+);

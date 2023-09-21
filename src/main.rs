@@ -6,9 +6,9 @@ mod services;
 use std::sync::Arc;
 
 use anyhow::Result;
+use env_logger::Env;
 use lingua::LanguageDetectorBuilder;
 use log::info;
-use env_logger::Env;
 
 use crate::algos::AlgosBuilder;
 use crate::algos::Nederlandskie;
@@ -48,7 +48,12 @@ async fn main() -> Result<()> {
             .build(),
     );
 
-    let post_indexer = PostIndexer::new(database.clone(), bluesky.clone(), algos.clone());
+    let post_indexer = PostIndexer::new(
+        database.clone(),
+        bluesky.clone(),
+        algos.clone(),
+        config.clone(),
+    );
     let profile_classifier = ProfileClassifier::new(database.clone(), ai.clone(), bluesky.clone());
     let feed_server = FeedServer::new(database.clone(), config.clone(), algos.clone());
 

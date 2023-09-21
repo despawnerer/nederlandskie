@@ -11,7 +11,7 @@ use atrium_api::com::atproto::sync::subscribe_repos::Message;
 
 #[async_trait]
 pub trait OperationProcessor {
-    async fn process_operation(&self, operation: &Operation) -> Result<()>;
+    async fn process_operation(&self, operation: &Operation, commit: &Commit) -> Result<()>;
 }
 
 #[derive(Debug)]
@@ -36,7 +36,7 @@ pub async fn handle_message<P: OperationProcessor>(message: &[u8], processor: &P
 
     let post_operations = extract_operations(&commit).await?;
     for operation in &post_operations {
-        processor.process_operation(&operation).await?;
+        processor.process_operation(&operation, &commit).await?;
     }
 
     Ok(())
