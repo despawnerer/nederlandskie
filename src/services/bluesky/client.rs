@@ -4,6 +4,7 @@ use atrium_api::client::AtpServiceWrapper;
 use atrium_xrpc::client::reqwest::ReqwestClient;
 use futures::StreamExt;
 use tokio_tungstenite::{connect_async, tungstenite};
+use log::error;
 
 use super::streaming::{handle_message, OperationProcessor};
 
@@ -59,7 +60,7 @@ impl Bluesky {
 
         while let Some(Ok(tungstenite::Message::Binary(message))) = stream.next().await {
             if let Err(e) = handle_message(&message, processor).await {
-                println!("Error handling a message: {:?}", e);
+                error!("Error handling a message: {:?}", e);
             }
         }
 

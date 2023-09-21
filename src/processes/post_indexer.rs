@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use async_trait::async_trait;
+use log::info;
 
 use crate::algos::Algos;
 use crate::services::bluesky::{Bluesky, Operation, OperationProcessor};
@@ -25,6 +26,7 @@ impl PostIndexer {
 
 impl PostIndexer {
     pub async fn start(&self) -> Result<()> {
+        info!("Starting");
         Ok(self.bluesky.subscribe_to_operations(self).await?)
     }
 }
@@ -45,7 +47,7 @@ impl OperationProcessor for PostIndexer {
                     .iter_all()
                     .any(|a| a.should_index_post(author_did, languages, text))
                 {
-                    println!("received insertable post from {author_did}: {text}");
+                    info!("Received insertable post from {author_did}: {text}");
 
                     self.database
                         .insert_profile_if_it_doesnt_exist(&author_did)
@@ -54,7 +56,7 @@ impl OperationProcessor for PostIndexer {
                 }
             }
             Operation::DeletePost { uri } => {
-                println!("received a post do delete: {uri}");
+                info!("Received a post to delete: {uri}");
 
                 // TODO: Delete posts from db
                 // self.database.delete_post(&self.db_connection_pool, &uri).await?;

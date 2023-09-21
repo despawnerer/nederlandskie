@@ -2,6 +2,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
+use log::info;
 
 use crate::services::Bluesky;
 use crate::services::Database;
@@ -23,6 +24,7 @@ impl ProfileClassifier {
     }
 
     pub async fn start(&self) -> Result<()> {
+        info!("Starting");
         loop {
             // TODO: Don't just exit this function when an error happens, just wait a minute or so?
             self.classify_unclassified_profiles().await?;
@@ -34,9 +36,10 @@ impl ProfileClassifier {
 
         let dids = self.database.fetch_unprocessed_profile_dids().await?;
         if dids.is_empty() {
-            println!("No profiles to process: waiting 10 seconds");
+            info!("No profiles to process: waiting 10 seconds");
             tokio::time::sleep(Duration::from_secs(10)).await;
         } else {
+            info!("Classifying {} new profiles", dids.len());
             for did in &dids {
                 self.fill_in_profile_details(did).await?;
             }
@@ -52,7 +55,7 @@ impl ProfileClassifier {
             .infer_country_of_living(&details.display_name, &details.description)
             .await?;
         self.database.store_profile_details(did, &country).await?;
-        println!("Stored inferred country of living for {did}: {country}");
+        info!("Stored inferred country of living for {did}: {country}");
         Ok(())
     }
 }

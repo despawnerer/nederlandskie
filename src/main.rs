@@ -7,6 +7,8 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use lingua::LanguageDetectorBuilder;
+use log::info;
+use env_logger::Env;
 
 use crate::algos::AlgosBuilder;
 use crate::algos::Nederlandskie;
@@ -20,11 +22,20 @@ use crate::services::AI;
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+
+    info!("Loading configuration");
+
     let config = Arc::new(Config::load()?);
+
+    info!("Initializing service clients");
 
     let ai = Arc::new(AI::new(&config.chat_gpt_api_key, "https://api.openai.com"));
     let bluesky = Arc::new(Bluesky::new("https://bsky.social"));
     let database = Arc::new(Database::connect(&config.database_url).await?);
+
+    info!("Initializing language detector");
+
     let language_detector = Arc::new(
         LanguageDetectorBuilder::from_all_languages()
             .with_preloaded_language_models()
@@ -40,6 +51,8 @@ async fn main() -> Result<()> {
     let post_indexer = PostIndexer::new(database.clone(), bluesky.clone(), algos.clone());
     let profile_classifier = ProfileClassifier::new(database.clone(), ai.clone(), bluesky.clone());
     let feed_server = FeedServer::new(database.clone(), config.clone(), algos.clone());
+
+    info!("Starting everything up");
 
     tokio::try_join!(
         post_indexer.start(),

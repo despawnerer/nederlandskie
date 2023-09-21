@@ -4,6 +4,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use axum::routing::get;
 use axum::{Router, Server};
+use log::info;
 
 use crate::algos::Algos;
 use crate::config::Config;
@@ -46,6 +47,9 @@ impl FeedServer {
             });
 
         let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+
+        info!("Serving feed on {}", addr);
+
         Server::bind(&addr).serve(app.into_make_service()).await?;
         Ok(())
     }
