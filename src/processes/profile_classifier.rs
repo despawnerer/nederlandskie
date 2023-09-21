@@ -42,7 +42,7 @@ impl ProfileClassifier {
             for did in &dids {
                 match self.fill_in_profile_details(did).await {
                     Ok(()) => continue,
-                    Err(e) => error!("Could not classify profile: {:?}", e)
+                    Err(e) => error!("Could not classify profile: {:?}", e),
                 }
             }
         }
