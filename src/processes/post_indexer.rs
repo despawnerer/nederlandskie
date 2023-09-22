@@ -49,7 +49,7 @@ impl PostIndexer {
 
         info!("Subscribing with cursor {:?}", cursor);
 
-        Ok(self.bluesky.subscribe_to_operations(self, cursor).await?)
+        self.bluesky.subscribe_to_operations(self, cursor).await
     }
 }
 
@@ -70,7 +70,7 @@ impl CommitProcessor for PostIndexer {
                             info!("Received insertable post from {author_did}: {text}");
 
                             self.database
-                                .insert_profile_if_it_doesnt_exist(&author_did)
+                                .insert_profile_if_it_doesnt_exist(author_did)
                                 .await?;
 
                             self.database.insert_post(author_did, cid, uri).await?;

@@ -48,15 +48,14 @@ impl Algos {
     }
 }
 
+#[derive(Default)]
 pub struct AlgosBuilder {
     algos: AlgosMap,
 }
 
 impl AlgosBuilder {
     pub fn new() -> Self {
-        Self {
-            algos: AlgosMap::new(),
-        }
+        Default::default()
     }
 
     pub fn add<T: Algo + Send + Sync + 'static>(mut self, name: &str, algo: T) -> Self {

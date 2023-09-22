@@ -33,7 +33,7 @@ pub enum Operation {
 }
 
 pub async fn handle_message<P: CommitProcessor>(message: &[u8], processor: &P) -> Result<()> {
-    let commit = match parse_commit_from_message(&message)? {
+    let commit = match parse_commit_from_message(message)? {
         Some(commit) => commit,
         None => return Ok(()),
     };
@@ -43,7 +43,7 @@ pub async fn handle_message<P: CommitProcessor>(message: &[u8], processor: &P) -
     processor
         .process_commit(&CommitDetails {
             seq: commit.seq,
-            operations: operations,
+            operations,
         })
         .await?;
 
@@ -77,12 +77,7 @@ async fn extract_operations(commit: &Commit) -> Result<Vec<Operation>> {
 
             operations.push(match op.action.as_str() {
                 "create" => Operation::CreatePost {
-                    languages: record
-                        .langs
-                        .unwrap_or_else(Vec::new)
-                        .iter()
-                        .cloned()
-                        .collect(),
+                    languages: record.langs.unwrap_or_default().iter().cloned().collect(),
                     text: record.text,
                     author_did: commit.repo.clone(),
                     cid: op

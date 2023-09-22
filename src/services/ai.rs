@@ -36,6 +36,6 @@ impl AI {
         let response = self.chat_gpt_client.chat(chat_input).await?;
 
         // TODO: Error handling?
-        return Ok(response.choices[0].message.content.to_lowercase());
+        Ok(response.choices[0].message.content.to_lowercase())
     }
 }

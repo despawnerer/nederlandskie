@@ -125,8 +125,8 @@ impl Bluesky {
         };
 
         Ok(ProfileDetails {
-            display_name: profile.display_name.unwrap_or_else(String::new),
-            description: profile.description.unwrap_or_else(String::new),
+            display_name: profile.display_name.unwrap_or_default(),
+            description: profile.description.unwrap_or_default(),
         })
     }
 
