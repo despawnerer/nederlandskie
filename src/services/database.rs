@@ -12,13 +12,6 @@ pub struct Post {
     pub uri: String,
 }
 
-pub struct Profile {
-    first_seen_at: DateTime<Utc>,
-    did: String,
-    has_been_processed: bool,
-    likely_country_of_living: Option<String>,
-}
-
 pub struct Database {
     connection_pool: PgPool,
 }
