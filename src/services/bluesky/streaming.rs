@@ -6,12 +6,16 @@ use async_trait::async_trait;
 use super::proto::Frame;
 use anyhow::anyhow;
 use atrium_api::app::bsky::feed::post::Record;
-use atrium_api::com::atproto::sync::subscribe_repos::Commit;
-use atrium_api::com::atproto::sync::subscribe_repos::Message;
+use atrium_api::com::atproto::sync::subscribe_repos::{Commit, Message};
 
 #[async_trait]
-pub trait OperationProcessor {
-    async fn process_operation(&self, operation: &Operation, commit: &Commit) -> Result<()>;
+pub trait CommitProcessor {
+    async fn process_commit(&self, commit: &CommitDetails) -> Result<()>;
+}
+
+pub struct CommitDetails {
+    pub seq: i32,
+    pub operations: Vec<Operation>,
 }
 
 #[derive(Debug)]
@@ -28,16 +32,20 @@ pub enum Operation {
     },
 }
 
-pub async fn handle_message<P: OperationProcessor>(message: &[u8], processor: &P) -> Result<()> {
+pub async fn handle_message<P: CommitProcessor>(message: &[u8], processor: &P) -> Result<()> {
     let commit = match parse_commit_from_message(&message)? {
         Some(commit) => commit,
         None => return Ok(()),
     };
 
-    let post_operations = extract_operations(&commit).await?;
-    for operation in &post_operations {
-        processor.process_operation(&operation, &commit).await?;
-    }
+    let operations = extract_operations(&commit).await?;
+
+    processor
+        .process_commit(&CommitDetails {
+            seq: commit.seq,
+            operations: operations,
+        })
+        .await?;
 
     Ok(())
 }

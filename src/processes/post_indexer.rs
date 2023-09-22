@@ -2,12 +2,11 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use atrium_api::com::atproto::sync::subscribe_repos::Commit;
 use log::info;
 
 use crate::algos::Algos;
 use crate::config::Config;
-use crate::services::bluesky::{Bluesky, Operation, OperationProcessor};
+use crate::services::bluesky::{Bluesky, CommitDetails, CommitProcessor, Operation};
 use crate::services::Database;
 
 pub struct PostIndexer {
@@ -55,37 +54,39 @@ impl PostIndexer {
 }
 
 #[async_trait]
-impl OperationProcessor for PostIndexer {
-    async fn process_operation(&self, operation: &Operation, commit: &Commit) -> Result<()> {
-        match operation {
-            Operation::CreatePost {
-                author_did,
-                cid,
-                uri,
-                languages,
-                text,
-            } => {
-                for algo in self.algos.iter_all() {
-                    if algo.should_index_post(author_did, languages, text).await? {
-                        info!("Received insertable post from {author_did}: {text}");
+impl CommitProcessor for PostIndexer {
+    async fn process_commit(&self, commit: &CommitDetails) -> Result<()> {
+        for operation in &commit.operations {
+            match operation {
+                Operation::CreatePost {
+                    author_did,
+                    cid,
+                    uri,
+                    languages,
+                    text,
+                } => {
+                    for algo in self.algos.iter_all() {
+                        if algo.should_index_post(author_did, languages, text).await? {
+                            info!("Received insertable post from {author_did}: {text}");
 
-                        self.database
-                            .insert_profile_if_it_doesnt_exist(&author_did)
-                            .await?;
+                            self.database
+                                .insert_profile_if_it_doesnt_exist(&author_did)
+                                .await?;
 
-                        self.database.insert_post(&author_did, &cid, &uri).await?;
+                            self.database.insert_post(author_did, cid, uri).await?;
 
-                        break;
+                            break;
+                        }
                     }
                 }
-            }
-            Operation::DeletePost { uri } => {
-                info!("Received a post to delete: {uri}");
+                Operation::DeletePost { uri } => {
+                    info!("Received a post to delete: {uri}");
 
-                // TODO: Delete posts from db
-                // self.database.delete_post(&self.db_connection_pool, &uri).await?;
+                    // TODO: Delete posts from db
+                    // self.database.delete_post(&self.db_connection_pool, &uri).await?;
+                }
             }
-        };
+        }
 
         if commit.seq % 20 == 0 {
             info!(

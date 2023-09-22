@@ -6,7 +6,7 @@ use futures::StreamExt;
 use log::error;
 use tokio_tungstenite::{connect_async, tungstenite};
 
-use super::streaming::{handle_message, OperationProcessor};
+use super::streaming::{handle_message, CommitProcessor};
 
 #[derive(Debug)]
 pub struct ProfileDetails {
@@ -51,7 +51,7 @@ impl Bluesky {
         })
     }
 
-    pub async fn subscribe_to_operations<P: OperationProcessor>(
+    pub async fn subscribe_to_operations<P: CommitProcessor>(
         &self,
         processor: &P,
         cursor: Option<i32>,

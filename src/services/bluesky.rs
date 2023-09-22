@@ -3,4 +3,4 @@ mod proto;
 mod streaming;
 
 pub use client::Bluesky;
-pub use streaming::{Operation, OperationProcessor};
+pub use streaming::{CommitDetails, CommitProcessor, Operation};
