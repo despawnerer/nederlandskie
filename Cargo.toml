@@ -2,6 +2,7 @@
 name = "nederlandskie"
 version = "0.1.0"
 edition = "2021"
+default-run = "nederlandskie"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -14,6 +15,7 @@ axum = "0.6.20"
 chat-gpt-lib-rs = "0.2.1"
 chrono = "0.4.31"
 ciborium = "0.2.1"
+clap = { version = "4.4.4", features = ["derive"] }
 dotenv = "0.15.0"
 env_logger = "0.10.0"
 futures = "0.3.28"

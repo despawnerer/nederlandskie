@@ -9,7 +9,7 @@ pub async fn describe_feed_generator(
     State(state): State<FeedServerState>,
 ) -> Json<FeedGeneratorDescription> {
     Json(FeedGeneratorDescription {
-        did: state.config.service_did.clone(),
+        did: state.config.feed_generator_did.clone(),
         feeds: state
             .algos
             .iter_names()

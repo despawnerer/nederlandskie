@@ -5,9 +5,9 @@ use std::env;
 pub struct Config {
     pub chat_gpt_api_key: String,
     pub database_url: String,
-    pub service_did: String,
+    pub feed_generator_did: String,
     pub publisher_did: String,
-    pub hostname: String,
+    pub feed_generator_hostname: String,
 }
 
 impl Config {
@@ -17,9 +17,9 @@ impl Config {
         Ok(Self {
             chat_gpt_api_key: env::var("CHAT_GPT_API_KEY")?,
             database_url: env::var("DATABASE_URL")?,
-            hostname: env::var("HOSTNAME")?,
-            service_did: format!("did:web:{}", env::var("HOSTNAME")?),
-            publisher_did: "".to_owned(), // TODO
+            feed_generator_hostname: env::var("FEED_GENERATOR_HOSTNAME")?,
+            feed_generator_did: format!("did:web:{}", env::var("FEED_GENERATOR_HOSTNAME")?),
+            publisher_did: env::var("PUBLISHER_DID")?,
         })
     }
 }

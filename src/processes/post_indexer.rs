@@ -38,12 +38,12 @@ impl PostIndexer {
 
         let cursor = self
             .database
-            .fetch_subscription_cursor(&self.config.service_did)
+            .fetch_subscription_cursor(&self.config.feed_generator_did)
             .await?;
 
         if cursor.is_none() {
             self.database
-                .create_subscription_state(&self.config.service_did)
+                .create_subscription_state(&self.config.feed_generator_did)
                 .await?;
         }
 
@@ -91,10 +91,10 @@ impl CommitProcessor for PostIndexer {
         if commit.seq % 20 == 0 {
             info!(
                 "Updating cursor for {} to {}",
-                self.config.service_did, commit.seq
+                self.config.feed_generator_did, commit.seq
             );
             self.database
-                .update_subscription_cursor(&self.config.service_did, commit.seq)
+                .update_subscription_cursor(&self.config.feed_generator_did, commit.seq)
                 .await?;
         }
 

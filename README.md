@@ -15,14 +15,32 @@ Heavily WIP. Doesn't work yet at all, but does read the stream of posts as they 
 - [ ] Publish the feed
 - [ ] Handle deleting of posts
 
-## Initial setup
+## Configuration
 
-Copy `.env.example` into `.env` and set up the environment variables within:
+1. Copy `.env.example` into `.env` and set up the environment variables within:
 
-- `CHAT_GPT_API_KEY` for your ChatGPT key
-- `DATABASE_URL` for PostgreSQL credentials
-- `HOSTNAME` to the hostname of where you intend to host the feed
+   - `PUBLISHER_BLUESKY_HANDLE` to your Bluesky handle
+   - `PUBLISHER_BLUESKY_PASSWORD` to Bluesky app password that you created in settings
+   - `CHAT_GPT_API_KEY` for your ChatGPT key
+   - `DATABASE_URL` for PostgreSQL credentials
+   - `FEED_GENERATOR_HOSTNAME` to the hostname of where you intend to host the feed
+
+2. Determine your own DID and put it in `PUBLISHER_DID` env variable in `.env`:
+
+   ```
+   cargo run --bin who_am_i
+   ```
 
 ## Running
 
+### Populate and serve the feed
+
 `cargo run`
+
+### Determine your own did for publishing
+
+`cargo run --bin who_am_i`
+
+### Publish the feed
+
+`cargo run --bin publish_feed -- --help`

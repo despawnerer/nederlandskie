@@ -22,11 +22,11 @@ pub struct Service {
 pub async fn did_json(State(state): State<FeedServerState>) -> Json<Did> {
     Json(Did {
         context: vec!["https://www.w3.org/ns/did/v1".to_owned()],
-        id: state.config.service_did.clone(),
+        id: state.config.feed_generator_did.clone(),
         service: vec![Service {
             id: "#bsky_fg".to_owned(),
             type_: "BskyFeedGenerator".to_owned(),
-            service_endpoint: format!("https://{}", state.config.hostname),
+            service_endpoint: format!("https://{}", state.config.feed_generator_hostname),
         }],
     })
 }
