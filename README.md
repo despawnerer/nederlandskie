@@ -12,8 +12,12 @@ Heavily WIP. Doesn't work yet at all, but does read the stream of posts as they 
 - [x] Detect the country of residence from profile information
 - [x] Keep subscription state to not lose messages
 - [x] Serve the feed
-- [ ] Publish the feed
 - [x] Handle deleting of posts
+- [ ] Handle errors in the web service gracefully
+- [ ] Handle missing profiles in the profile classifier
+- [ ] Add a way to mark a profile as being from a certain country manually
+- [ ] Handle reconnecting to websocket somehow
+- [ ] Publish the feed
 
 ## Configuration
 
