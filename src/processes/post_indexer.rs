@@ -82,8 +82,7 @@ impl CommitProcessor for PostIndexer {
                 Operation::DeletePost { uri } => {
                     info!("Received a post to delete: {uri}");
 
-                    // TODO: Delete posts from db
-                    // self.database.delete_post(&self.db_connection_pool, &uri).await?;
+                    self.database.delete_post(&uri).await?;
                 }
                 _ => continue,
             }

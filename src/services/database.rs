@@ -1,6 +1,8 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
-use scooby::postgres::{insert_into, select, update, Aliasable, Joinable, Orderable, Parameters};
+use scooby::postgres::{
+    delete_from, insert_into, select, update, Aliasable, Joinable, Orderable, Parameters,
+};
 use sqlx::postgres::{PgPool, PgPoolOptions, PgRow};
 use sqlx::query;
 use sqlx::Row;
@@ -81,6 +83,20 @@ impl Database {
             })
             .fetch_all(&self.connection_pool)
             .await?)
+    }
+
+    pub async fn delete_post(&self, uri: &str) -> Result<bool> {
+        let mut params = Parameters::new();
+
+        Ok(query(
+            &delete_from("Post")
+                .where_(format!("uri = {}", params.next()))
+                .to_string(),
+        )
+        .bind(uri)
+        .execute(&self.connection_pool)
+        .await
+        .map(|result| result.rows_affected() > 0)?)
     }
 
     pub async fn insert_profile_if_it_doesnt_exist(&self, did: &str) -> Result<bool> {

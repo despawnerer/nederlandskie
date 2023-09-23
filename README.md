@@ -13,7 +13,7 @@ Heavily WIP. Doesn't work yet at all, but does read the stream of posts as they 
 - [x] Keep subscription state to not lose messages
 - [x] Serve the feed
 - [ ] Publish the feed
-- [ ] Handle deleting of posts
+- [x] Handle deleting of posts
 
 ## Configuration
 
