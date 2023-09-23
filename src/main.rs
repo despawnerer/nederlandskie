@@ -29,7 +29,7 @@ async fn main() -> Result<()> {
     info!("Initializing language detector");
 
     let language_detector = Arc::new(
-        LanguageDetectorBuilder::from_all_languages()
+        LanguageDetectorBuilder::from_all_languages_with_cyrillic_script()
             .with_preloaded_language_models()
             .build(),
     );
