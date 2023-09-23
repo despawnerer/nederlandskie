@@ -85,6 +85,7 @@ impl CommitProcessor for PostIndexer {
                     // TODO: Delete posts from db
                     // self.database.delete_post(&self.db_connection_pool, &uri).await?;
                 }
+                _ => continue,
             }
         }
 
