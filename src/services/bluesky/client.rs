@@ -1,9 +1,12 @@
+use std::matches;
+
 use anyhow::{anyhow, Result};
 use atrium_api::blob::BlobRef;
 use atrium_api::client::AtpServiceClient;
 use atrium_api::client::AtpServiceWrapper;
 use atrium_api::records::Record;
 use atrium_xrpc::client::reqwest::ReqwestClient;
+use axum::http::StatusCode;
 use chrono::Utc;
 use futures::StreamExt;
 use log::error;
@@ -104,7 +107,7 @@ impl Bluesky {
         Ok(())
     }
 
-    pub async fn fetch_profile_details(&self, did: &str) -> Result<ProfileDetails> {
+    pub async fn fetch_profile_details(&self, did: &str) -> Result<Option<ProfileDetails>> {
         let result = self
             .client
             .service
@@ -117,17 +120,23 @@ impl Bluesky {
                 repo: did.to_owned(),
                 rkey: "self".to_owned(),
             })
-            .await?;
+            .await;
 
-        let profile = match result.value {
+        let profile_data = match result {
+            Ok(profile_data) => profile_data,
+            Err(e) if is_missing_record_error(&e) => return Ok(None),
+            Err(e) => return Err(e.into()),
+        };
+
+        let profile = match profile_data.value {
             Record::AppBskyActorProfile(profile) => profile,
             _ => return Err(anyhow!("Big bad, no such profile")),
         };
 
-        Ok(ProfileDetails {
+        Ok(Some(ProfileDetails {
             display_name: profile.display_name.unwrap_or_default(),
             description: profile.description.unwrap_or_default(),
-        })
+        }))
     }
 
     pub async fn subscribe_to_operations<P: CommitProcessor>(
@@ -153,4 +162,20 @@ impl Bluesky {
 
         Ok(())
     }
+}
+
+fn is_missing_record_error<T>(error: &atrium_xrpc::error::Error<T>) -> bool {
+    use atrium_xrpc::error::{Error, ErrorResponseBody, XrpcError, XrpcErrorKind};
+
+    matches!(error,
+        Error::XrpcResponse(XrpcError {
+            status: StatusCode::BAD_REQUEST,
+            error:
+                Some(XrpcErrorKind::Undefined(ErrorResponseBody {
+                    error: Some(error_code),
+                    message: Some(error_message),
+                })),
+        }) if error_code == "InvalidRequest"
+            && error_message.starts_with("Could not locate record")
+    )
 }

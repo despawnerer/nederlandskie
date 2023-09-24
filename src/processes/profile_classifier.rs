@@ -54,10 +54,16 @@ impl ProfileClassifier {
 
     async fn fill_in_profile_details(&self, did: &str) -> Result<()> {
         let details = self.bluesky.fetch_profile_details(did).await?;
-        let country = self
-            .ai
-            .infer_country_of_living(&details.display_name, &details.description)
-            .await?;
+
+        let country = match details {
+            Some(details) => {
+                self.ai
+                    .infer_country_of_living(&details.display_name, &details.description)
+                    .await?
+            }
+            None => "xx".to_owned(),
+        };
+
         self.database.store_profile_details(did, &country).await?;
         info!("Stored inferred country of living for {did}: {country}");
         Ok(())

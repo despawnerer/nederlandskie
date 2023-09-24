@@ -14,7 +14,7 @@ Heavily WIP. Doesn't work yet at all, but does read the stream of posts as they 
 - [x] Serve the feed
 - [x] Handle deleting of posts
 - [ ] Handle errors in the web service gracefully
-- [ ] Handle missing profiles in the profile classifier
+- [x] Handle missing profiles in the profile classifier
 - [ ] Add a way to mark a profile as being from a certain country manually
 - [ ] Handle reconnecting to websocket somehow
 - [ ] Publish the feed
