@@ -4,7 +4,10 @@ use anyhow::Result;
 use async_trait::async_trait;
 use atrium_api::com::atproto::sync::subscribe_repos::{Commit, Message};
 
-use super::{proto::Frame, decode::{read_record, PostRecord, LikeRecord, FollowRecord}};
+use super::{
+    decode::{read_record, FollowRecord, LikeRecord, PostRecord},
+    proto::Frame,
+};
 
 const COLLECTION_POST: &str = "app.bsky.feed.post";
 const COLLECTION_LIKE: &str = "app.bsky.feed.like";
@@ -109,7 +112,7 @@ async fn extract_operations(commit: &Commit) -> Result<Vec<Operation>> {
 
                 match collection {
                     COLLECTION_POST => {
-                        let record: PostRecord = read_record(&block)?;
+                        let record: PostRecord = read_record(block)?;
 
                         Operation::CreatePost {
                             author_did: commit.repo.clone(),
@@ -120,7 +123,7 @@ async fn extract_operations(commit: &Commit) -> Result<Vec<Operation>> {
                         }
                     }
                     COLLECTION_LIKE => {
-                        let record: LikeRecord = read_record(&block)?;
+                        let record: LikeRecord = read_record(block)?;
 
                         Operation::CreateLike {
                             author_did: commit.repo.clone(),
@@ -131,7 +134,7 @@ async fn extract_operations(commit: &Commit) -> Result<Vec<Operation>> {
                         }
                     }
                     COLLECTION_FOLLOW => {
-                        let record: FollowRecord = read_record(&block)?;
+                        let record: FollowRecord = read_record(block)?;
 
                         Operation::CreateFollow {
                             author_did: commit.repo.clone(),
