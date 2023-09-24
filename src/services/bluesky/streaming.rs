@@ -4,7 +4,7 @@ use anyhow::Result;
 use async_trait::async_trait;
 use atrium_api::com::atproto::sync::subscribe_repos::{Commit, Message};
 
-use super::proto::Frame;
+use super::{proto::Frame, decode::{read_record, PostRecord, LikeRecord, FollowRecord}};
 
 const COLLECTION_POST: &str = "app.bsky.feed.post";
 const COLLECTION_LIKE: &str = "app.bsky.feed.like";
@@ -109,9 +109,7 @@ async fn extract_operations(commit: &Commit) -> Result<Vec<Operation>> {
 
                 match collection {
                     COLLECTION_POST => {
-                        use atrium_api::app::bsky::feed::post::Record;
-
-                        let record: Record = ciborium::from_reader(&mut block.as_slice())?;
+                        let record: PostRecord = read_record(&block)?;
 
                         Operation::CreatePost {
                             author_did: commit.repo.clone(),
@@ -122,9 +120,7 @@ async fn extract_operations(commit: &Commit) -> Result<Vec<Operation>> {
                         }
                     }
                     COLLECTION_LIKE => {
-                        use atrium_api::app::bsky::feed::like::Record;
-
-                        let record: Record = ciborium::from_reader(&mut block.as_slice())?;
+                        let record: LikeRecord = read_record(&block)?;
 
                         Operation::CreateLike {
                             author_did: commit.repo.clone(),
@@ -135,9 +131,7 @@ async fn extract_operations(commit: &Commit) -> Result<Vec<Operation>> {
                         }
                     }
                     COLLECTION_FOLLOW => {
-                        use atrium_api::app::bsky::graph::follow::Record;
-
-                        let record: Record = ciborium::from_reader(&mut block.as_slice())?;
+                        let record: FollowRecord = read_record(&block)?;
 
                         Operation::CreateFollow {
                             author_did: commit.repo.clone(),
