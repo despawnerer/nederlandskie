@@ -1,6 +1,6 @@
 mod endpoints;
+mod errors;
 mod server;
 mod state;
-mod errors;
 
 pub use server::FeedServer;

@@ -7,8 +7,8 @@ use axum::extract::{Query, State};
 use axum::Json;
 use chrono::{DateTime, TimeZone, Utc};
 
-use crate::processes::feed_server::state::FeedServerState;
 use crate::processes::feed_server::errors::AppError;
+use crate::processes::feed_server::state::FeedServerState;
 
 pub async fn get_feed_skeleton(
     State(state): State<FeedServerState>,
@@ -20,11 +20,7 @@ pub async fn get_feed_skeleton(
         .ok_or_else(|| AppError::FeedNotFound(query.feed.clone()))?;
 
     let limit = query.limit.unwrap_or(20);
-    let earlier_than = query
-        .cursor
-        .as_deref()
-        .map(parse_cursor)
-        .transpose()?;
+    let earlier_than = query.cursor.as_deref().map(parse_cursor).transpose()?;
 
     let posts = algo
         .fetch_posts(&state.database, limit, earlier_than)
@@ -50,8 +46,12 @@ fn make_cursor(date: &DateTime<Utc>, cid: &str) -> String {
 fn parse_cursor(cursor: &str) -> anyhow::Result<(DateTime<Utc>, &str)> {
     let mut parts = cursor.split("::");
 
-    let indexed_at = parts.next().ok_or_else(|| anyhow!("Malformed cursor: {cursor}"))?;
-    let cid = parts.next().ok_or_else(|| anyhow!("Malformed cursor: {cursor}"))?;
+    let indexed_at = parts
+        .next()
+        .ok_or_else(|| anyhow!("Malformed cursor: {cursor}"))?;
+    let cid = parts
+        .next()
+        .ok_or_else(|| anyhow!("Malformed cursor: {cursor}"))?;
 
     if parts.next().is_some() {
         return Err(anyhow!("Malformed cursor: {cursor}"));
