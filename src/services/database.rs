@@ -149,6 +149,49 @@ impl Database {
         .map(|result| result.rows_affected() > 0)?)
     }
 
+    pub async fn force_profile_country(
+        &self,
+        did: &str,
+        likely_country_of_living: &str,
+    ) -> Result<bool> {
+        let transaction = self.connection_pool.begin().await?;
+
+        {
+            let mut params = Parameters::new();
+
+            query(
+                &insert_into("Profile")
+                    .columns(("did",))
+                    .values([params.next()])
+                    .on_conflict()
+                    .do_nothing()
+                    .to_string(),
+            )
+            .bind(did)
+            .execute(&self.connection_pool)
+            .await?;
+        }
+
+        {
+            let mut params = Parameters::new();
+            query(
+                &update("Profile")
+                    .set("has_been_processed", "TRUE")
+                    .set("likely_country_of_living", params.next())
+                    .where_(format!("did = {}", params.next()))
+                    .to_string(),
+            )
+            .bind(likely_country_of_living)
+            .bind(did)
+            .execute(&self.connection_pool)
+            .await?;
+        }
+
+        transaction.commit().await?;
+
+        Ok(true)
+    }
+
     pub async fn fetch_subscription_cursor(&self, did: &str) -> Result<Option<i32>> {
         let mut params = Parameters::new();
 

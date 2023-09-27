@@ -139,6 +139,27 @@ impl Bluesky {
         }))
     }
 
+    pub async fn resolve_handle(&self, handle: &str) -> Result<Option<String>> {
+        use atrium_api::com::atproto::identity::resolve_handle::Parameters;
+
+        let result = self
+            .client
+            .service
+            .com
+            .atproto
+            .identity
+            .resolve_handle(Parameters {
+                handle: handle.to_owned(),
+            })
+            .await;
+
+        match result {
+            Ok(result) => Ok(Some(result.did)),
+            Err(e) if is_unable_to_resolve_handle_error(&e) => Ok(None),
+            Err(e) => Err(e.into()),
+        }
+    }
+
     pub async fn subscribe_to_operations<P: CommitProcessor>(
         &self,
         processor: &P,
@@ -177,5 +198,21 @@ fn is_missing_record_error<T>(error: &atrium_xrpc::error::Error<T>) -> bool {
                 })),
         }) if error_code == "InvalidRequest"
             && error_message.starts_with("Could not locate record")
+    )
+}
+
+fn is_unable_to_resolve_handle_error<T>(error: &atrium_xrpc::error::Error<T>) -> bool {
+    use atrium_xrpc::error::{Error, ErrorResponseBody, XrpcError, XrpcErrorKind};
+
+    matches!(error,
+        Error::XrpcResponse(XrpcError {
+            status: StatusCode::BAD_REQUEST,
+            error:
+                Some(XrpcErrorKind::Undefined(ErrorResponseBody {
+                    error: Some(error_code),
+                    message: Some(error_message),
+                })),
+        }) if error_code == "InvalidRequest"
+            && error_message.starts_with("Unable to resolve handle")
     )
 }
