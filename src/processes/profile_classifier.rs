@@ -25,9 +25,13 @@ impl ProfileClassifier {
 
     pub async fn start(&self) -> Result<()> {
         info!("Starting");
+
         loop {
-            // TODO: Don't just exit this function when an error happens, just wait a minute or so?
-            self.classify_unclassified_profiles().await?;
+            if let Err(e) = self.classify_unclassified_profiles().await {
+                error!("Problem with classifying profiles: {}", e)
+            }
+
+            tokio::time::sleep(Duration::from_secs(10)).await;
         }
     }
 
@@ -35,8 +39,9 @@ impl ProfileClassifier {
         // TODO: Maybe streamify this so that each thing is processed in parallel
 
         let dids = self.database.fetch_unprocessed_profile_dids().await?;
+
         if dids.is_empty() {
-            info!("No profiles to process: waiting 10 seconds");
+            info!("No profiles to process");
         } else {
             info!("Classifying {} new profiles", dids.len());
             for did in &dids {
@@ -46,8 +51,6 @@ impl ProfileClassifier {
                 }
             }
         }
-
-        tokio::time::sleep(Duration::from_secs(10)).await;
 
         Ok(())
     }

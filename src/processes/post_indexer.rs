@@ -1,8 +1,9 @@
 use std::sync::Arc;
+use std::time::Duration;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use log::info;
+use log::{error, info};
 
 use crate::algos::Algos;
 use crate::config::Config;
@@ -36,6 +37,18 @@ impl PostIndexer {
     pub async fn start(&self) -> Result<()> {
         info!("Starting");
 
+        loop {
+            if let Err(e) = self.process_from_last_point().await {
+                error!("Stopped because of an error: {}", e);
+            }
+
+            info!("Waiting 10 seconds before reconnecting...");
+
+            tokio::time::sleep(Duration::from_secs(10)).await;
+        }
+    }
+
+    async fn process_from_last_point(&self) -> Result<()> {
         let cursor = self
             .database
             .fetch_subscription_cursor(&self.config.feed_generator_did)
