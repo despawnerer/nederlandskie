@@ -103,8 +103,8 @@ impl CommitProcessor for PostIndexer {
 
         if commit.seq % 20 == 0 {
             info!(
-                "Updating cursor for {} to {}",
-                self.config.feed_generator_did, commit.seq
+                "Updating cursor for {} to {} ({})",
+                self.config.feed_generator_did, commit.seq, commit.time
             );
             self.database
                 .update_subscription_cursor(&self.config.feed_generator_did, commit.seq)

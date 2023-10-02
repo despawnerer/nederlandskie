@@ -3,6 +3,7 @@ use std::collections::{HashMap, HashSet};
 use anyhow::Result;
 use async_trait::async_trait;
 use atrium_api::com::atproto::sync::subscribe_repos::{Commit, Message};
+use chrono::{DateTime, Utc};
 
 use super::{
     decode::{read_record, FollowRecord, LikeRecord, PostRecord},
@@ -23,6 +24,7 @@ pub trait CommitProcessor {
 
 pub struct CommitDetails {
     pub seq: i32,
+    pub time: DateTime<Utc>,
     pub operations: Vec<Operation>,
 }
 
@@ -70,6 +72,7 @@ pub async fn handle_message<P: CommitProcessor>(message: &[u8], processor: &P) -
     processor
         .process_commit(&CommitDetails {
             seq: commit.seq,
+            time: commit.time.parse()?,
             operations,
         })
         .await?;
