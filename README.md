@@ -1,8 +1,10 @@
 # `nederlandskie`
 
-Potentially, a Bluesky feed of people speaking some language while living in some other country (for example, Russian-speaking people living in Netherlands).
+A Bluesky feed generator written in Rust.
 
-Heavily WIP. Doesn't work yet at all, but does read the stream of posts as they are created on Bluesky.
+The specific algorithm indexes and serves posts written in Russian language, by people living in Netherlands.
+
+Not fully complete yet, see roadmap.
 
 ## Roadmap
 
