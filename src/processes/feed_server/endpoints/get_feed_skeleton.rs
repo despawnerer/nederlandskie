@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use anyhow::anyhow;
 use atrium_api::app::bsky::feed::defs::SkeletonFeedPost;
 use atrium_api::app::bsky::feed::get_feed_skeleton::{
@@ -7,24 +9,23 @@ use axum::extract::{Query, State};
 use axum::Json;
 use chrono::{DateTime, TimeZone, Utc};
 
+use crate::algos::Algos;
 use crate::processes::feed_server::errors::AppError;
-use crate::processes::feed_server::state::FeedServerState;
+use crate::services::Database;
 
 pub async fn get_feed_skeleton(
-    State(state): State<FeedServerState>,
+    State(algos): State<Arc<Algos>>,
+    State(database): State<Arc<Database>>,
     query: Query<FeedSkeletonQuery>,
 ) -> Result<Json<FeedSkeleton>, AppError> {
-    let algo = state
-        .algos
+    let algo = algos
         .get_by_name(&query.feed)
         .ok_or_else(|| AppError::FeedNotFound(query.feed.clone()))?;
 
     let limit = query.limit.unwrap_or(20);
     let earlier_than = query.cursor.as_deref().map(parse_cursor).transpose()?;
 
-    let posts = algo
-        .fetch_posts(&state.database, limit, earlier_than)
-        .await?;
+    let posts = algo.fetch_posts(&database, limit, earlier_than).await?;
 
     let feed = posts
         .iter()

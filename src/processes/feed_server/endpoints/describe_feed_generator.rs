@@ -1,22 +1,24 @@
+use std::sync::Arc;
+
 use atrium_api::app::bsky::feed::describe_feed_generator::{
     Feed, Output as FeedGeneratorDescription,
 };
 use axum::{extract::State, Json};
 
-use crate::processes::feed_server::state::FeedServerState;
+use crate::{algos::Algos, config::Config};
 
 pub async fn describe_feed_generator(
-    State(state): State<FeedServerState>,
+    State(config): State<Arc<Config>>,
+    State(algos): State<Arc<Algos>>,
 ) -> Json<FeedGeneratorDescription> {
     Json(FeedGeneratorDescription {
-        did: state.config.feed_generator_did.clone(),
-        feeds: state
-            .algos
+        did: config.feed_generator_did.clone(),
+        feeds: algos
             .iter_names()
             .map(|name| Feed {
                 uri: format!(
                     "at://{}/app.bsky.feed.generator/{}",
-                    state.config.publisher_did, name
+                    config.publisher_did, name
                 ),
             })
             .collect(),
