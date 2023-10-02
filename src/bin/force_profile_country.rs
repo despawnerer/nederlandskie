@@ -10,9 +10,9 @@ use nederlandskie::services::{Bluesky, Database};
 
 #[derive(Parser, Debug)]
 struct Args {
-    /// Handle of the user to force the country for
-    #[arg(long)]
-    handle: String,
+    /// Handles of the users to force the country for, comma-separated
+    #[arg(long, required(true), value_delimiter(','))]
+    handle: Vec<String>,
 
     /// Country to use, two letters
     #[arg(long)]
@@ -29,22 +29,23 @@ async fn main() -> Result<()> {
         env::var("DATABASE_URL").context("DATABASE_URL environment variable must be set")?;
 
     let bluesky = Bluesky::new("https://bsky.social");
-
-    let did = bluesky
-        .resolve_handle(&args.handle)
-        .await?
-        .ok_or_else(|| anyhow!("No such user: {}", args.handle))?;
-
-    println!("Resolved handle '{}' to did '{}'", args.handle, did);
-
     let database = Database::connect(&database_url).await?;
 
-    database.force_profile_country(&did, &args.country).await?;
+    for handle in &args.handle {
+        let did = bluesky
+            .resolve_handle(handle)
+            .await?
+            .ok_or_else(|| anyhow!("No such user: {}", handle))?;
 
-    println!(
-        "Stored '{}' as the country for profile with did '{}'",
-        args.country, did
-    );
+        println!("Resolved handle '{}' to did '{}'", handle, did);
+
+        database.force_profile_country(&did, &args.country).await?;
+
+        println!(
+            "Stored '{}' as the country for profile with did '{}'",
+            args.country, did
+        );
+    }
 
     Ok(())
 }
