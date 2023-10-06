@@ -46,7 +46,7 @@ impl FeedServer {
                 algos: self.algos,
             });
 
-        let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+        let addr = SocketAddr::from(([0, 0, 0, 0], 3030));
 
         info!("Serving feed on {}", addr);
 
