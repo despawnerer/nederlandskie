@@ -2,7 +2,7 @@ extern crate nederlandskie;
 
 use std::env;
 
-use anyhow::{Context, Result, anyhow};
+use anyhow::{anyhow, Context, Result};
 use dotenv::dotenv;
 
 use nederlandskie::services::Bluesky;
@@ -18,7 +18,9 @@ async fn main() -> Result<()> {
         .context("PUBLISHER_BLUESKY_PASSWORD environment variable must be set")?;
 
     let bluesky = Bluesky::login("https://bsky.social", &handle, &password).await?;
-    let session = bluesky.session().ok_or_else(|| anyhow!("Could not log in"))?;
+    let session = bluesky
+        .session()
+        .ok_or_else(|| anyhow!("Could not log in"))?;
 
     println!("{}", session.did);
 

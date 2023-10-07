@@ -25,14 +25,14 @@ pub struct ProfileDetails {
 
 pub struct Bluesky {
     client: AtpServiceClient<AtpServiceWrapper<AuthenticateableXrpcClient>>,
-    session: Option<Arc<Mutex<Session>>>
+    session: Option<Arc<Mutex<Session>>>,
 }
 
 impl Bluesky {
     pub fn unauthenticated(host: &str) -> Self {
         Self {
             client: AtpServiceClient::new(AuthenticateableXrpcClient::new(host.to_owned())),
-            session: None
+            session: None,
         }
     }
 
@@ -56,17 +56,20 @@ impl Bluesky {
 
         let authenticated_client = AtpServiceClient::new(AuthenticateableXrpcClient::with_session(
             host.to_owned(),
-            session.clone()
+            session.clone(),
         ));
 
         Ok(Self {
             client: authenticated_client,
-            session: Some(session)
+            session: Some(session),
         })
     }
 
     pub fn session(&self) -> Option<Session> {
-        self.session.as_ref().and_then(|s| s.lock().ok()).map(|s| s.clone())
+        self.session
+            .as_ref()
+            .and_then(|s| s.lock().ok())
+            .map(|s| s.clone())
     }
 
     pub async fn upload_blob(&self, blob: Vec<u8>) -> Result<BlobRef> {
@@ -204,15 +207,28 @@ impl Bluesky {
     }
 
     async fn ensure_token_valid(&self) -> Result<()> {
-        let access_jwt_exp =
-            self.session.as_ref().ok_or_else(|| anyhow!("Not authenticated"))?.lock().map_err(|e| anyhow!("session mutex is poisoned: {e}"))?.access_jwt_exp;
+        let access_jwt_exp = self
+            .session
+            .as_ref()
+            .ok_or_else(|| anyhow!("Not authenticated"))?
+            .lock()
+            .map_err(|e| anyhow!("session mutex is poisoned: {e}"))?
+            .access_jwt_exp;
 
         let jwt_expired = Utc::now() > access_jwt_exp;
 
         if jwt_expired {
-            let refreshed = self.client.service.com.atproto.server.refresh_session().await?;
+            let refreshed = self
+                .client
+                .service
+                .com
+                .atproto
+                .server
+                .refresh_session()
+                .await?;
 
-            let mut session = self.session
+            let mut session = self
+                .session
                 .as_ref()
                 .ok_or_else(|| anyhow!("Not authenticated"))?
                 .lock()

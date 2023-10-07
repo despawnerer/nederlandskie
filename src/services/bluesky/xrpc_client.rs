@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use atrium_xrpc::{client::reqwest::ReqwestClient, HttpClient, XrpcClient};
-use http::{Request, Response, Method};
+use http::{Method, Request, Response};
 use std::sync::{Arc, Mutex};
 
 use super::session::Session;
@@ -35,9 +35,16 @@ impl HttpClient for AuthenticateableXrpcClient {
         let (mut parts, body) = req.into_parts();
 
         /* NOTE: This is a huge hack because auth is currently totally broken in atrium-api */
-        let is_request_to_refresh_session = parts.method == Method::POST && parts.uri.to_string().ends_with("com.atproto.server.refreshSession");
+        let is_request_to_refresh_session = parts.method == Method::POST
+            && parts
+                .uri
+                .to_string()
+                .ends_with("com.atproto.server.refreshSession");
         if let Some(token) = self.auth(is_request_to_refresh_session) {
-            parts.headers.insert(http::header::AUTHORIZATION, format!("Bearer {}", token).parse()?);
+            parts.headers.insert(
+                http::header::AUTHORIZATION,
+                format!("Bearer {}", token).parse()?,
+            );
         }
 
         let req = Request::from_parts(parts, body);

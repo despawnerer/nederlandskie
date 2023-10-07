@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use log::{error, info, debug};
+use log::{debug, error, info};
 
 use crate::algos::Algos;
 use crate::config::Config;

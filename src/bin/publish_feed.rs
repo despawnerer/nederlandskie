@@ -51,7 +51,6 @@ async fn main() -> Result<()> {
         avatar = Some(bluesky.upload_blob(bytes).await?);
         println!("Uploaded avatar");
     }
-    
 
     bluesky
         .publish_feed(
