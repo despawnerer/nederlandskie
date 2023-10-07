@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use log::{error, info};
+use log::{error, info, debug};
 
 use crate::algos::Algos;
 use crate::config::Config;
@@ -102,7 +102,7 @@ impl CommitProcessor for PostIndexer {
         }
 
         if commit.seq % 20 == 0 {
-            info!(
+            debug!(
                 "Updating cursor for {} to {} ({})",
                 self.config.feed_generator_did, commit.seq, commit.time
             );
