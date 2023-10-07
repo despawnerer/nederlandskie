@@ -18,9 +18,15 @@ pub async fn get_feed_skeleton(
     State(database): State<Arc<Database>>,
     query: Query<FeedSkeletonQuery>,
 ) -> Result<Json<FeedSkeleton>, AppError> {
+    let feed_name = query
+        .feed
+        .split('/')
+        .last()
+        .ok_or_else(|| anyhow!("Invalid feed URI"))?;
+
     let algo = algos
-        .get_by_name(&query.feed)
-        .ok_or_else(|| AppError::FeedNotFound(query.feed.clone()))?;
+        .get_by_name(feed_name)
+        .ok_or_else(|| AppError::FeedNotFound(feed_name.to_owned()))?;
 
     let limit = query.limit.unwrap_or(20);
     let earlier_than = query.cursor.as_deref().map(parse_cursor).transpose()?;
