@@ -1,18 +1,21 @@
 use std::matches;
+use std::sync::Arc;
+use std::sync::Mutex;
 
 use anyhow::{anyhow, Result};
 use atrium_api::blob::BlobRef;
 use atrium_api::client::AtpServiceClient;
 use atrium_api::client::AtpServiceWrapper;
 use atrium_api::records::Record;
-use atrium_xrpc::client::reqwest::ReqwestClient;
 use axum::http::StatusCode;
 use chrono::Utc;
 use futures::StreamExt;
 use log::error;
 use tokio_tungstenite::{connect_async, tungstenite};
 
+use super::session::Session;
 use super::streaming::{handle_message, CommitProcessor};
+use super::xrpc_client::AuthenticateableXrpcClient;
 
 #[derive(Debug)]
 pub struct ProfileDetails {
@@ -20,27 +23,25 @@ pub struct ProfileDetails {
     pub description: String,
 }
 
-#[derive(Debug)]
-pub struct SessionDetails {
-    pub did: String,
-}
-
 pub struct Bluesky {
-    client: AtpServiceClient<AtpServiceWrapper<ReqwestClient>>,
+    client: AtpServiceClient<AtpServiceWrapper<AuthenticateableXrpcClient>>,
+    session: Option<Arc<Mutex<Session>>>
 }
 
 impl Bluesky {
-    pub fn new(host: &str) -> Self {
+    pub fn unauthenticated(host: &str) -> Self {
         Self {
-            client: AtpServiceClient::new(ReqwestClient::new(host.to_owned())),
+            client: AtpServiceClient::new(AuthenticateableXrpcClient::new(host.to_owned())),
+            session: None
         }
     }
 
-    pub async fn login(&self, handle: &str, password: &str) -> Result<SessionDetails> {
+    pub async fn login(host: &str, handle: &str, password: &str) -> Result<Self> {
         use atrium_api::com::atproto::server::create_session::Input;
 
-        let result = self
-            .client
+        let client = AtpServiceClient::new(AuthenticateableXrpcClient::new(host.to_owned()));
+
+        let result = client
             .service
             .com
             .atproto
@@ -51,10 +52,26 @@ impl Bluesky {
             })
             .await?;
 
-        Ok(SessionDetails { did: result.did })
+        let session = Arc::new(Mutex::new(result.try_into()?));
+
+        let authenticated_client = AtpServiceClient::new(AuthenticateableXrpcClient::with_session(
+            host.to_owned(),
+            session.clone()
+        ));
+
+        Ok(Self {
+            client: authenticated_client,
+            session: Some(session)
+        })
+    }
+
+    pub fn session(&self) -> Option<Session> {
+        self.session.as_ref().and_then(|s| s.lock().ok()).map(|s| s.clone())
     }
 
     pub async fn upload_blob(&self, blob: Vec<u8>) -> Result<BlobRef> {
+        self.ensure_token_valid().await?;
+
         let result = self
             .client
             .service
@@ -78,6 +95,8 @@ impl Bluesky {
     ) -> Result<()> {
         use atrium_api::com::atproto::repo::put_record::Input;
 
+        self.ensure_token_valid().await?;
+
         self.client
             .service
             .com
@@ -88,7 +107,7 @@ impl Bluesky {
                 record: Record::AppBskyFeedGenerator(Box::new(
                     atrium_api::app::bsky::feed::generator::Record {
                         avatar,
-                        created_at: Utc::now().to_string(),
+                        created_at: Utc::now().to_rfc3339(),
                         description: Some(description.to_owned()),
                         description_facets: None,
                         did: feed_generator_did.to_owned(),
@@ -179,6 +198,27 @@ impl Bluesky {
             if let Err(e) = handle_message(&message, processor).await {
                 error!("Error handling a message: {:?}", e);
             }
+        }
+
+        Ok(())
+    }
+
+    async fn ensure_token_valid(&self) -> Result<()> {
+        let access_jwt_exp =
+            self.session.as_ref().ok_or_else(|| anyhow!("Not authenticated"))?.lock().map_err(|e| anyhow!("session mutex is poisoned: {e}"))?.access_jwt_exp;
+
+        let jwt_expired = Utc::now() > access_jwt_exp;
+
+        if jwt_expired {
+            let refreshed = self.client.service.com.atproto.server.refresh_session().await?;
+
+            let mut session = self.session
+                .as_ref()
+                .ok_or_else(|| anyhow!("Not authenticated"))?
+                .lock()
+                .map_err(|e| anyhow!("session mutex is poisoned: {e}"))?;
+
+            *session = refreshed.try_into()?;
         }
 
         Ok(())

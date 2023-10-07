@@ -19,7 +19,7 @@ Not fully complete yet, see roadmap.
 - [x] Handle missing profiles in the profile classifier
 - [x] Add a way to mark a profile as being from a certain country manually
 - [x] Handle reconnecting to websocket somehow
-- [ ] Publish the feed
+- [x] Publish the feed
 
 ## Configuration
 

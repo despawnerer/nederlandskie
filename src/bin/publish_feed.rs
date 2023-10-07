@@ -41,19 +41,21 @@ async fn main() -> Result<()> {
 
     let feed_generator_did = format!("did:web:{}", env::var("FEED_GENERATOR_HOSTNAME")?);
 
-    let bluesky = Bluesky::new("https://bsky.social");
+    println!("Logging in");
 
-    let session = bluesky.login(&handle, &password).await?;
+    let bluesky = Bluesky::login("https://bsky.social", &handle, &password).await?;
 
     let mut avatar = None;
     if let Some(path) = args.avatar_filename {
         let bytes = std::fs::read(path)?;
         avatar = Some(bluesky.upload_blob(bytes).await?);
+        println!("Uploaded avatar");
     }
+    
 
     bluesky
         .publish_feed(
-            &session.did,
+            &bluesky.session().unwrap().did,
             &feed_generator_did,
             &args.name,
             &args.display_name,
