@@ -18,6 +18,7 @@ pub struct Service {
     id: String,
     #[serde(rename = "type")]
     type_: String,
+    #[serde(rename = "serviceEndpoint")]
     service_endpoint: String,
 }
 
