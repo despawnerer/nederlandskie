@@ -4,26 +4,17 @@ A Bluesky feed generator written in Rust.
 
 The specific algorithm indexes and serves posts written in Russian language, by people living in Netherlands.
 
-Not fully complete yet, see roadmap.
+Deployed in production at https://nederlandskie.plansfortheday.org/
 
-## Roadmap
+Published on Bluesky at https://bsky.app/profile/did:plc:376mcc6k4s5p7qbtyjrgph5k/feed/nederlandskie.
 
-- [x] Read stream of posts from Bluesky
-- [x] Store posts in the database
-- [x] Store user profiles in the database
-- [x] Detect the country of residence from profile information
-- [x] Keep subscription state to not lose messages
-- [x] Serve the feed
-- [x] Handle deleting of posts
-- [x] Handle errors in the web service gracefully
-- [x] Handle missing profiles in the profile classifier
-- [x] Add a way to mark a profile as being from a certain country manually
-- [x] Handle reconnecting to websocket somehow
-- [x] Publish the feed
+## Setup
 
-## Configuration
+1. Set up a PostgreSQL database
 
-1. Copy `.env.example` into `.env` and set up the environment variables within:
+2. Create tables using SQL provided in [sql/01_create_tables.sql].
+
+3. Copy `.env.example` into `.env` and set up the environment variables within:
 
    - `PUBLISHER_BLUESKY_HANDLE` to your Bluesky handle
    - `PUBLISHER_BLUESKY_PASSWORD` to Bluesky app password that you created in settings
@@ -31,7 +22,7 @@ Not fully complete yet, see roadmap.
    - `DATABASE_URL` for PostgreSQL credentials
    - `FEED_GENERATOR_HOSTNAME` to the hostname of where you intend to host the feed
 
-2. Determine your own DID and put it in `PUBLISHER_DID` env variable in `.env`:
+4. Determine your own DID and put it in `PUBLISHER_DID` env variable in `.env`:
 
    ```
    cargo run --bin who_am_i
@@ -43,6 +34,8 @@ Not fully complete yet, see roadmap.
 
 `cargo run`
 
+The feed will be available at http://localhost:3030/.
+
 ### Determine your own did for publishing
 
 `cargo run --bin who_am_i`
@@ -50,3 +43,7 @@ Not fully complete yet, see roadmap.
 ### Publish the feed
 
 `cargo run --bin publish_feed -- --help`
+
+### Force a profile to be in a certain country
+
+`cargo run --bin force_profile_country -- --help`
