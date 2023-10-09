@@ -4,6 +4,11 @@ A Bluesky feed generator written in Rust.
 
 The specific algorithm indexes and serves posts written in Russian language, by people living in Netherlands.
 
+- Posts are stored in PostgreSQL via [`sqlx`](https://crates.io/crates/sqlx) and [`scooby`](https://crates.io/crates/scooby)
+- Language of posts is determined via [`lingua-rs`](https://crates.io/crates/lingua)
+- Country of residence is inferred from profile information through ChatGPT via [`chat-gpt-lib-rs`](https://crates.io/crates/chat-gpt-lib-rs)
+- Feed is served via [`axum`](https://crates.io/crates/axum)
+
 Deployed in production at https://nederlandskie.plansfortheday.org/
 
 Published on Bluesky at https://bsky.app/profile/did:plc:376mcc6k4s5p7qbtyjrgph5k/feed/nederlandskie.
