@@ -13,9 +13,9 @@ use futures::StreamExt;
 use log::error;
 use tokio_tungstenite::{connect_async, tungstenite};
 
-use super::session::Session;
+use super::entities::Session;
+use super::internals::xrpc::AuthenticateableXrpcClient;
 use super::streaming::{handle_message, CommitProcessor};
-use super::xrpc_client::AuthenticateableXrpcClient;
 
 #[derive(Debug)]
 pub struct ProfileDetails {

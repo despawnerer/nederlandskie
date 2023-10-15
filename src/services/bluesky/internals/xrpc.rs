@@ -3,7 +3,7 @@ use atrium_xrpc::{client::reqwest::ReqwestClient, HttpClient, XrpcClient};
 use http::{Method, Request, Response};
 use std::sync::{Arc, Mutex};
 
-use super::session::Session;
+use crate::services::bluesky::entities::Session;
 
 pub struct AuthenticateableXrpcClient {
     inner: ReqwestClient,

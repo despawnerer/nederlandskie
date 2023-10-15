@@ -6,8 +6,9 @@ use atrium_api::com::atproto::sync::subscribe_repos::{Commit, Message};
 use chrono::{DateTime, Utc};
 
 use super::{
-    decode::{read_record, FollowRecord, LikeRecord, PostRecord},
-    proto::Frame,
+    entities::{FollowRecord, LikeRecord, PostRecord},
+    internals::cbor::read_record,
+    internals::ipld::Frame,
 };
 
 const COLLECTION_POST: &str = "app.bsky.feed.post";
