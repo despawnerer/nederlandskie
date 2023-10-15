@@ -79,7 +79,7 @@ impl CommitProcessor for PostIndexer {
                 } => {
                     for algo in self.algos.iter_all() {
                         if algo.should_index_post(author_did, post).await? {
-                            info!("Received insertable post from {author_did}: {}", post.text);
+                            info!("Received insertable post from {author_did}: {post:?}", );
 
                             self.database
                                 .insert_profile_if_it_doesnt_exist(author_did)
