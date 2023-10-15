@@ -43,7 +43,7 @@ async fn main() -> Result<()> {
 
     println!("Logging in");
 
-    let bluesky = Bluesky::login("https://bsky.social", &handle, &password).await?;
+    let bluesky = Bluesky::login(&handle, &password).await?;
 
     let mut avatar = None;
     if let Some(path) = args.avatar_filename {

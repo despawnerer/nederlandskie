@@ -23,17 +23,20 @@ pub struct Bluesky {
 }
 
 impl Bluesky {
-    pub fn unauthenticated(host: &str) -> Self {
+    const XRPC_HOST: &str = "https://bsky.social";
+    const FIREHOSE_HOST: &str = "wss://bsky.social";
+
+    pub fn unauthenticated() -> Self {
         Self {
-            client: AtpServiceClient::new(AuthenticateableXrpcClient::new(host.to_owned())),
+            client: AtpServiceClient::new(AuthenticateableXrpcClient::new(Self::XRPC_HOST.to_owned())),
             session: None,
         }
     }
 
-    pub async fn login(host: &str, handle: &str, password: &str) -> Result<Self> {
+    pub async fn login(handle: &str, password: &str) -> Result<Self> {
         use atrium_api::com::atproto::server::create_session::Input;
 
-        let client = AtpServiceClient::new(AuthenticateableXrpcClient::new(host.to_owned()));
+        let client = AtpServiceClient::new(AuthenticateableXrpcClient::new(Self::XRPC_HOST.to_owned()));
 
         let result = client
             .service
@@ -49,7 +52,7 @@ impl Bluesky {
         let session = Arc::new(Mutex::new(result.try_into()?));
 
         let authenticated_client = AtpServiceClient::new(AuthenticateableXrpcClient::with_session(
-            host.to_owned(),
+            Self::XRPC_HOST.to_owned(),
             session.clone(),
         ));
 
@@ -178,10 +181,10 @@ impl Bluesky {
     ) -> Result<()> {
         let url = match cursor {
             Some(cursor) => format!(
-                "wss://bsky.social/xrpc/com.atproto.sync.subscribeRepos?cursor={}",
-                cursor
+                "{}/xrpc/com.atproto.sync.subscribeRepos?cursor={}",
+                Self::FIREHOSE_HOST, cursor
             ),
-            None => "wss://bsky.social/xrpc/com.atproto.sync.subscribeRepos".to_owned(),
+            None => format!("{}/xrpc/com.atproto.sync.subscribeRepos", Self::FIREHOSE_HOST),
         };
 
         let (mut stream, _) = connect_async(url).await?;

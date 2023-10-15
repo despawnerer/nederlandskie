@@ -23,7 +23,7 @@ async fn main() -> Result<()> {
     info!("Initializing service clients");
 
     let ai = Arc::new(AI::new(&config.chat_gpt_api_key, "https://api.openai.com"));
-    let bluesky = Arc::new(Bluesky::unauthenticated("https://bsky.social"));
+    let bluesky = Arc::new(Bluesky::unauthenticated());
     let database = Arc::new(Database::connect(&config.database_url).await?);
 
     info!("Initializing language detector");

@@ -28,7 +28,7 @@ async fn main() -> Result<()> {
     let database_url =
         env::var("DATABASE_URL").context("DATABASE_URL environment variable must be set")?;
 
-    let bluesky = Bluesky::unauthenticated("https://bsky.social");
+    let bluesky = Bluesky::unauthenticated();
     let database = Database::connect(&database_url).await?;
 
     for handle in &args.handle {

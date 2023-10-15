@@ -17,7 +17,7 @@ async fn main() -> Result<()> {
     let password = env::var("PUBLISHER_BLUESKY_PASSWORD")
         .context("PUBLISHER_BLUESKY_PASSWORD environment variable must be set")?;
 
-    let bluesky = Bluesky::login("https://bsky.social", &handle, &password).await?;
+    let bluesky = Bluesky::login(&handle, &password).await?;
     let session = bluesky
         .session()
         .ok_or_else(|| anyhow!("Could not log in"))?;
