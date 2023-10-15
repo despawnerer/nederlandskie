@@ -4,6 +4,7 @@ use anyhow::{anyhow, Error, Result};
 
 use crate::services::bluesky::internals::cbor::CborValue;
 
+#[derive(Debug)]
 pub struct FollowRecord {
     pub subject: String,
 }

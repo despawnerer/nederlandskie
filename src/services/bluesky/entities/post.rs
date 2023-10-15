@@ -4,6 +4,7 @@ use anyhow::{anyhow, Error, Result};
 
 use crate::services::bluesky::internals::cbor::CborValue;
 
+#[derive(Debug)]
 pub struct PostRecord {
     pub langs: Option<Vec<String>>,
     pub text: String,
@@ -20,7 +21,10 @@ impl TryFrom<CborValue> for PostRecord {
                 .remove("text")
                 .ok_or_else(|| anyhow!("Missing field: text"))?
                 .try_into()?,
-            langs: map.remove("langs").map(|value| value.try_into()).transpose()?,
+            langs: map
+                .remove("langs")
+                .map(|value| value.try_into())
+                .transpose()?,
         })
     }
 }

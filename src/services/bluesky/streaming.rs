@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use anyhow::Result;
 use async_trait::async_trait;
@@ -35,21 +35,19 @@ pub enum Operation {
         author_did: String,
         cid: String,
         uri: String,
-        languages: HashSet<String>,
-        text: String,
+        post: PostRecord,
     },
     CreateLike {
         author_did: String,
         cid: String,
         uri: String,
-        subject_cid: String,
-        subject_uri: String,
+        like: LikeRecord,
     },
     CreateFollow {
         author_did: String,
         cid: String,
         uri: String,
-        subject: String,
+        follow: FollowRecord,
     },
     DeletePost {
         uri: String,
@@ -116,35 +114,33 @@ async fn extract_operations(commit: &Commit) -> Result<Vec<Operation>> {
 
                 match collection {
                     COLLECTION_POST => {
-                        let record: PostRecord = read_record(block)?;
+                        let post: PostRecord = read_record(block)?;
 
                         Operation::CreatePost {
                             author_did: commit.repo.clone(),
                             cid: cid.to_string(),
                             uri,
-                            languages: record.langs.unwrap_or_default().iter().cloned().collect(),
-                            text: record.text,
+                            post,
                         }
                     }
                     COLLECTION_LIKE => {
-                        let record: LikeRecord = read_record(block)?;
+                        let like: LikeRecord = read_record(block)?;
 
                         Operation::CreateLike {
                             author_did: commit.repo.clone(),
                             cid: cid.to_string(),
                             uri,
-                            subject_cid: record.subject.cid,
-                            subject_uri: record.subject.uri,
+                            like,
                         }
                     }
                     COLLECTION_FOLLOW => {
-                        let record: FollowRecord = read_record(block)?;
+                        let follow: FollowRecord = read_record(block)?;
 
                         Operation::CreateFollow {
                             author_did: commit.repo.clone(),
                             cid: cid.to_string(),
                             uri,
-                            subject: record.subject,
+                            follow,
                         }
                     }
                     _ => continue,

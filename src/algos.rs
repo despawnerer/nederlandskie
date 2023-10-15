@@ -1,30 +1,27 @@
 mod nederlandskie;
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use anyhow::Result;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 
-use crate::services::database::{Database, Post};
+use crate::services::bluesky;
+use crate::services::database::{self, Database};
 
 pub use self::nederlandskie::Nederlandskie;
 
 #[async_trait]
 pub trait Algo {
-    async fn should_index_post(
-        &self,
-        author_did: &str,
-        languages: &HashSet<String>,
-        text: &str,
-    ) -> Result<bool>;
+    async fn should_index_post(&self, author_did: &str, post: &bluesky::PostRecord)
+        -> Result<bool>;
 
     async fn fetch_posts(
         &self,
         database: &Database,
         limit: i32,
         earlier_than: Option<(DateTime<Utc>, &str)>,
-    ) -> Result<Vec<Post>>;
+    ) -> Result<Vec<database::Post>>;
 }
 
 pub type AnyAlgo = Box<dyn Algo + Sync + Send>;

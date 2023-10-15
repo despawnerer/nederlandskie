@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use std::sync::Arc;
 
 use anyhow::Result;
@@ -9,7 +8,8 @@ use lingua::LanguageDetector;
 
 use super::Algo;
 
-use crate::services::{database::Post, Database};
+use crate::services::bluesky;
+use crate::services::database::{self, Database};
 
 pub struct Nederlandskie {
     language_detector: Arc<LanguageDetector>,
@@ -27,10 +27,9 @@ impl Algo for Nederlandskie {
     async fn should_index_post(
         &self,
         _author_did: &str,
-        _languages: &HashSet<String>,
-        text: &str,
+        post: &bluesky::PostRecord,
     ) -> Result<bool> {
-        Ok(self.language_detector.detect_language_of(text) == Some(Russian))
+        Ok(self.language_detector.detect_language_of(&post.text) == Some(Russian))
     }
 
     async fn fetch_posts(
@@ -38,7 +37,7 @@ impl Algo for Nederlandskie {
         database: &Database,
         limit: i32,
         earlier_than: Option<(DateTime<Utc>, &str)>,
-    ) -> Result<Vec<Post>> {
+    ) -> Result<Vec<database::Post>> {
         Ok(database
             .fetch_posts_by_authors_country("nl", limit as usize, earlier_than)
             .await?)
