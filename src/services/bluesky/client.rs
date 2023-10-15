@@ -13,15 +13,9 @@ use futures::StreamExt;
 use log::error;
 use tokio_tungstenite::{connect_async, tungstenite};
 
-use super::entities::Session;
+use super::entities::{ProfileDetails, Session};
 use super::internals::xrpc::AuthenticateableXrpcClient;
 use super::streaming::{handle_message, CommitProcessor};
-
-#[derive(Debug)]
-pub struct ProfileDetails {
-    pub display_name: String,
-    pub description: String,
-}
 
 pub struct Bluesky {
     client: AtpServiceClient<AtpServiceWrapper<AuthenticateableXrpcClient>>,
@@ -150,15 +144,10 @@ impl Bluesky {
             Err(e) => return Err(e.into()),
         };
 
-        let profile = match profile_data.value {
-            Record::AppBskyActorProfile(profile) => profile,
-            _ => return Err(anyhow!("Big bad, no such profile")),
-        };
-
-        Ok(Some(ProfileDetails {
-            display_name: profile.display_name.unwrap_or_default(),
-            description: profile.description.unwrap_or_default(),
-        }))
+        match profile_data.value {
+            Record::AppBskyActorProfile(profile) => Ok(Some(ProfileDetails::from(*profile))),
+            _ => Err(anyhow!("Wrong type of record")),
+        }
     }
 
     pub async fn resolve_handle(&self, handle: &str) -> Result<Option<String>> {
