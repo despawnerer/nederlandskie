@@ -154,7 +154,7 @@ impl Database {
         did: &str,
         likely_country_of_living: &str,
     ) -> Result<bool> {
-        let transaction = self.connection_pool.begin().await?;
+        let mut transaction = self.connection_pool.begin().await?;
 
         {
             let mut params = Parameters::new();
@@ -168,7 +168,7 @@ impl Database {
                     .to_string(),
             )
             .bind(did)
-            .execute(&self.connection_pool)
+            .execute(&mut *transaction)
             .await?;
         }
 
@@ -183,7 +183,7 @@ impl Database {
             )
             .bind(likely_country_of_living)
             .bind(did)
-            .execute(&self.connection_pool)
+            .execute(&mut *transaction)
             .await?;
         }
 
