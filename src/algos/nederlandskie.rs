@@ -11,6 +11,7 @@ use super::Algo;
 use crate::services::bluesky;
 use crate::services::database::{self, Database};
 
+/// An algorithm that serves posts written in Russian by people living in Netherlands
 pub struct Nederlandskie {
     language_detector: Arc<LanguageDetector>,
 }
@@ -21,7 +22,6 @@ impl Nederlandskie {
     }
 }
 
-/// An algorithm that serves posts written in Russian by people living in Netherlands
 #[async_trait]
 impl Algo for Nederlandskie {
     async fn should_index_post(
