@@ -14,11 +14,25 @@ use crate::services::database::{self, Database};
 /// An algorithm that serves posts written in Russian by people living in Netherlands
 pub struct Nederlandskie {
     language_detector: Arc<LanguageDetector>,
+    database: Arc<Database>,
 }
 
 impl Nederlandskie {
-    pub fn new(language_detector: Arc<LanguageDetector>) -> Self {
-        Self { language_detector }
+    pub fn new(language_detector: Arc<LanguageDetector>, database: Arc<Database>) -> Self {
+        Self {
+            language_detector,
+            database,
+        }
+    }
+}
+
+impl Nederlandskie {
+    fn is_post_in_russian(&self, post: &bluesky::PostRecord) -> bool {
+        self.language_detector.detect_language_of(&post.text) == Some(Russian)
+    }
+
+    async fn is_profile_residing_in_netherlands(&self, did: &str) -> Result<bool> {
+        Ok(self.database.is_profile_in_this_country(did, "nl").await? == Some(true))
     }
 }
 
@@ -26,10 +40,11 @@ impl Nederlandskie {
 impl Algo for Nederlandskie {
     async fn should_index_post(
         &self,
-        _author_did: &str,
+        author_did: &str,
         post: &bluesky::PostRecord,
     ) -> Result<bool> {
-        Ok(self.language_detector.detect_language_of(&post.text) == Some(Russian))
+        Ok(self.is_post_in_russian(&post)
+            || self.is_profile_residing_in_netherlands(author_did).await?)
     }
 
     async fn fetch_posts(

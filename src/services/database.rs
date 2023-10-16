@@ -192,6 +192,27 @@ impl Database {
         Ok(true)
     }
 
+    pub async fn is_profile_in_this_country(
+        &self,
+        did: &str,
+        country: &str,
+    ) -> Result<Option<bool>> {
+        let mut params = Parameters::new();
+
+        Ok(query(
+            &select("likely_country_of_living")
+                .from("Profile")
+                .where_(format!("did = {}", params.next()))
+                .where_("has_been_processed = TRUE")
+                .to_string(),
+        )
+        .bind(did)
+        .map(|r: PgRow| r.get("likely_country_of_living"))
+        .map(|c: String| c == country)
+        .fetch_optional(&self.connection_pool)
+        .await?)
+    }
+
     pub async fn fetch_subscription_cursor(&self, did: &str) -> Result<Option<i32>> {
         let mut params = Parameters::new();
 

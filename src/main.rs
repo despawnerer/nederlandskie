@@ -36,7 +36,10 @@ async fn main() -> Result<()> {
 
     let algos = Arc::new(
         AlgosBuilder::new()
-            .add("nederlandskie", Nederlandskie::new(language_detector))
+            .add(
+                "nederlandskie",
+                Nederlandskie::new(language_detector, database.clone()),
+            )
             .build(),
     );
 
