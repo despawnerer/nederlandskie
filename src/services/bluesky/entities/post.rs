@@ -26,7 +26,8 @@ impl TryFrom<CborValue> for PostRecord {
                 .remove("langs")
                 .map(|value| value.try_into())
                 .transpose()?,
-            reply: map.remove("reply")
+            reply: map
+                .remove("reply")
                 .map(|value| value.try_into())
                 .transpose()?,
         })

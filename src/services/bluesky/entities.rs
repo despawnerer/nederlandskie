@@ -1,11 +1,11 @@
 mod follow;
 mod like;
 mod post;
-mod session;
 mod profile;
+mod session;
 
 pub use follow::FollowRecord;
 pub use like::LikeRecord;
 pub use post::PostRecord;
-pub use session::Session;
 pub use profile::ProfileDetails;
+pub use session::Session;

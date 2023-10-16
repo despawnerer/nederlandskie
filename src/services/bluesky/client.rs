@@ -28,7 +28,9 @@ impl Bluesky {
 
     pub fn unauthenticated() -> Self {
         Self {
-            client: AtpServiceClient::new(AuthenticateableXrpcClient::new(Self::XRPC_HOST.to_owned())),
+            client: AtpServiceClient::new(AuthenticateableXrpcClient::new(
+                Self::XRPC_HOST.to_owned(),
+            )),
             session: None,
         }
     }
@@ -36,7 +38,8 @@ impl Bluesky {
     pub async fn login(handle: &str, password: &str) -> Result<Self> {
         use atrium_api::com::atproto::server::create_session::Input;
 
-        let client = AtpServiceClient::new(AuthenticateableXrpcClient::new(Self::XRPC_HOST.to_owned()));
+        let client =
+            AtpServiceClient::new(AuthenticateableXrpcClient::new(Self::XRPC_HOST.to_owned()));
 
         let result = client
             .service
@@ -182,9 +185,13 @@ impl Bluesky {
         let url = match cursor {
             Some(cursor) => format!(
                 "{}/xrpc/com.atproto.sync.subscribeRepos?cursor={}",
-                Self::FIREHOSE_HOST, cursor
+                Self::FIREHOSE_HOST,
+                cursor
             ),
-            None => format!("{}/xrpc/com.atproto.sync.subscribeRepos", Self::FIREHOSE_HOST),
+            None => format!(
+                "{}/xrpc/com.atproto.sync.subscribeRepos",
+                Self::FIREHOSE_HOST
+            ),
         };
 
         let (mut stream, _) = connect_async(url).await?;
