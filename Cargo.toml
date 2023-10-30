@@ -8,16 +8,16 @@ default-run = "nederlandskie"
 
 [dependencies]
 anyhow = "1.0.75"
-async-trait = "0.1.73"
-atrium-api = "0.9.0"
+async-trait = "0.1.74"
+atrium-api = "0.9.1"
 atrium-xrpc = "0.4.0"
 axum = "0.6.20"
 chat-gpt-lib-rs = "0.2.1"
 chrono = "0.4.31"
-clap = { version = "4.4.6", features = ["derive"] }
+clap = { version = "4.4.7", features = ["derive"] }
 dotenv = "0.15.0"
 env_logger = "0.10.0"
-futures = "0.3.28"
+futures = "0.3.29"
 http = "0.2.9"
 jwt = "0.16.0"
 libipld-core = { version = "0.16.0", features = ["serde-codec"] }
@@ -27,7 +27,7 @@ once_cell = "1.18.0"
 reqwest = "0.11.22"
 rs-car = "0.4.1"
 scooby = "0.5.0"
-serde = "1.0.189"
+serde = "1.0.190"
 serde_ipld_dagcbor = "0.4.2"
 sk-cbor = "0.1.2"
 sqlx = { version = "0.7.2", default-features = false, features = ["postgres", "runtime-tokio-native-tls", "chrono"] }
