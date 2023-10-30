@@ -1,7 +1,9 @@
+use std::error::Error;
+use std::sync::{Arc, Mutex};
+
 use async_trait::async_trait;
 use atrium_xrpc::{client::reqwest::ReqwestClient, HttpClient, XrpcClient};
-use http::{Method, Request, Response};
-use std::sync::{Arc, Mutex};
+use http::{Request, Response};
 
 use crate::services::bluesky::entities::Session;
 
@@ -31,24 +33,7 @@ impl HttpClient for AuthenticateableXrpcClient {
     async fn send_http(
         &self,
         req: Request<Vec<u8>>,
-    ) -> Result<Response<Vec<u8>>, Box<dyn std::error::Error + Send + Sync + 'static>> {
-        let (mut parts, body) = req.into_parts();
-
-        /* NOTE: This is a huge hack because auth is currently totally broken in atrium-api */
-        let is_request_to_refresh_session = parts.method == Method::POST
-            && parts
-                .uri
-                .to_string()
-                .ends_with("com.atproto.server.refreshSession");
-        if let Some(token) = self.auth(is_request_to_refresh_session) {
-            parts.headers.insert(
-                http::header::AUTHORIZATION,
-                format!("Bearer {}", token).parse()?,
-            );
-        }
-
-        let req = Request::from_parts(parts, body);
-
+    ) -> Result<Response<Vec<u8>>, Box<dyn Error + Send + Sync + 'static>> {
         self.inner.send_http(req).await
     }
 }
