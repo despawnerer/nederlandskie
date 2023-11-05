@@ -51,12 +51,12 @@ impl PostIndexer {
     async fn process_from_last_point(&self) -> Result<()> {
         let cursor = self
             .database
-            .fetch_subscription_cursor(&self.config.feed_generator_did)
+            .fetch_subscription_cursor(Bluesky::FIREHOSE_HOST, &self.config.feed_generator_did)
             .await?;
 
         if cursor.is_none() {
             self.database
-                .create_subscription_state(&self.config.feed_generator_did)
+                .create_subscription_state(Bluesky::FIREHOSE_HOST, &self.config.feed_generator_did)
                 .await?;
         }
 
@@ -106,7 +106,7 @@ impl CommitProcessor for PostIndexer {
                 self.config.feed_generator_did, commit.seq, commit.time
             );
             self.database
-                .update_subscription_cursor(&self.config.feed_generator_did, commit.seq)
+                .update_subscription_cursor(Bluesky::FIREHOSE_HOST, &self.config.feed_generator_did, commit.seq)
                 .await?;
         }
 

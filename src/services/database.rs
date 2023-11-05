@@ -213,48 +213,53 @@ impl Database {
         .await?)
     }
 
-    pub async fn fetch_subscription_cursor(&self, did: &str) -> Result<Option<i32>> {
+    pub async fn fetch_subscription_cursor(&self, host: &str, did: &str) -> Result<Option<i32>> {
         let mut params = Parameters::new();
 
         Ok(query(
             &select("cursor")
                 .from("SubscriptionState")
                 .where_(format!("service = {}", params.next()))
+                .where_(format!("host = {}", params.next()))
                 .to_string(),
         )
         .bind(did)
+        .bind(host)
         .map(|r: PgRow| r.get("cursor"))
         .fetch_optional(&self.connection_pool)
         .await?)
     }
 
-    pub async fn create_subscription_state(&self, did: &str) -> Result<bool> {
+    pub async fn create_subscription_state(&self, host: &str, did: &str) -> Result<bool> {
         let mut params = Parameters::new();
 
         Ok(query(
             &insert_into("SubscriptionState")
-                .columns(("service", "cursor"))
+                .columns(("service", "cursor", "host"))
                 .values([params.next_array()])
                 .to_string(),
         )
         .bind(did)
         .bind(0)
+        .bind(host)
         .execute(&self.connection_pool)
         .await
         .map(|result| result.rows_affected() > 0)?)
     }
 
-    pub async fn update_subscription_cursor(&self, did: &str, cursor: i32) -> Result<bool> {
+    pub async fn update_subscription_cursor(&self, host: &str, did: &str, cursor: i32) -> Result<bool> {
         let mut params = Parameters::new();
 
         Ok(query(
             &update("SubscriptionState")
                 .set("cursor", params.next())
                 .where_(format!("service = {}", params.next()))
+                .where_(format!("host = {}", params.next()))
                 .to_string(),
         )
         .bind(cursor)
         .bind(did)
+        .bind(host)
         .execute(&self.connection_pool)
         .await
         .map(|result| result.rows_affected() > 0)?)
