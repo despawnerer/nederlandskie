@@ -5,7 +5,6 @@ use std::sync::Mutex;
 use anyhow::{anyhow, Result};
 use atrium_api::blob::BlobRef;
 use atrium_api::client::AtpServiceClient;
-use atrium_api::client::AtpServiceWrapper;
 use atrium_api::records::Record;
 use axum::http::StatusCode;
 use chrono::Utc;
@@ -18,7 +17,7 @@ use super::internals::xrpc::AuthenticateableXrpcClient;
 use super::streaming::{handle_message, CommitProcessor};
 
 pub struct Bluesky {
-    client: AtpServiceClient<AtpServiceWrapper<AuthenticateableXrpcClient>>,
+    client: AtpServiceClient<AuthenticateableXrpcClient>,
     session: Option<Arc<Mutex<Session>>>,
 }
 

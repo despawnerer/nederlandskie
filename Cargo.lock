@@ -163,9 +163,9 @@ dependencies = [
 
 [[package]]
 name = "atrium-api"
-version = "0.9.1"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "328806e40f0fcb646f40d559eb4d9e204f04899b30082d8dd0c4f0aab6ba02bd"
+checksum = "bc9e9a28946f4bddb0b3efaf84e018f242432f4759a791e4fc6c3a6e43d14ac9"
 dependencies = [
  "async-trait",
  "atrium-xrpc",
@@ -173,13 +173,14 @@ dependencies = [
  "http",
  "serde",
  "serde_bytes",
+ "tokio",
 ]
 
 [[package]]
 name = "atrium-xrpc"
-version = "0.4.0"
+version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35c68d93cfc911c693310c5a1618c7614c1d45765218b054d77663ff227b29f1"
+checksum = "b8880c7efbe9750010ef44143d0aadca92d0bd45ccf4682752385e9f34af3739"
 dependencies = [
  "async-trait",
  "http",
