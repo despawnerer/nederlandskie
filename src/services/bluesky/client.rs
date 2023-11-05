@@ -24,7 +24,7 @@ pub struct Bluesky {
 
 impl Bluesky {
     pub const XRPC_HOST: &str = "https://bsky.social";
-    pub const FIREHOSE_HOST: &str = "wss://bsky.social";
+    pub const FIREHOSE_HOST: &str = "wss://bsky.network";
 
     pub fn unauthenticated() -> Self {
         Self {
