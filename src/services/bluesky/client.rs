@@ -1,9 +1,9 @@
 use std::matches;
 
 use anyhow::{anyhow, Result};
+use atrium_api::agent::{AtpAgent, Session};
 use atrium_api::blob::BlobRef;
 use atrium_api::records::Record;
-use atrium_api::agent::{AtpAgent, Session};
 use atrium_xrpc::client::reqwest::ReqwestClient;
 use axum::http::StatusCode;
 use chrono::Utc;
@@ -11,7 +11,7 @@ use futures::StreamExt;
 use log::error;
 use tokio_tungstenite::{connect_async, tungstenite};
 
-use super::entities::{ProfileDetails};
+use super::entities::ProfileDetails;
 use super::streaming::{handle_message, CommitProcessor};
 
 pub struct Bluesky {
@@ -24,7 +24,7 @@ impl Bluesky {
 
     pub fn unauthenticated() -> Self {
         Self {
-            agent: AtpAgent::new(ReqwestClient::new(Self::XRPC_HOST.to_owned()))
+            agent: AtpAgent::new(ReqwestClient::new(Self::XRPC_HOST.to_owned())),
         }
     }
 
@@ -40,14 +40,7 @@ impl Bluesky {
     }
 
     pub async fn upload_blob(&self, blob: Vec<u8>) -> Result<BlobRef> {
-        let result = self
-            .agent
-            .api
-            .com
-            .atproto
-            .repo
-            .upload_blob(blob)
-            .await?;
+        let result = self.agent.api.com.atproto.repo.upload_blob(blob).await?;
 
         Ok(result.blob)
     }

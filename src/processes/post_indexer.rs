@@ -106,7 +106,11 @@ impl CommitProcessor for PostIndexer {
                 self.config.feed_generator_did, commit.seq, commit.time
             );
             self.database
-                .update_subscription_cursor(Bluesky::FIREHOSE_HOST, &self.config.feed_generator_did, commit.seq)
+                .update_subscription_cursor(
+                    Bluesky::FIREHOSE_HOST,
+                    &self.config.feed_generator_did,
+                    commit.seq,
+                )
                 .await?;
         }
 

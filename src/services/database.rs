@@ -247,7 +247,12 @@ impl Database {
         .map(|result| result.rows_affected() > 0)?)
     }
 
-    pub async fn update_subscription_cursor(&self, host: &str, did: &str, cursor: i32) -> Result<bool> {
+    pub async fn update_subscription_cursor(
+        &self,
+        host: &str,
+        did: &str,
+        cursor: i32,
+    ) -> Result<bool> {
         let mut params = Parameters::new();
 
         Ok(query(

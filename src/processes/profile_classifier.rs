@@ -56,16 +56,18 @@ impl ProfileClassifier {
     }
 
     async fn fill_in_profile_details(&self, did: &str) -> Result<()> {
-        let details = self.bluesky.fetch_profile_details(did).await.context("Could not fetch profile details")?;
+        let details = self
+            .bluesky
+            .fetch_profile_details(did)
+            .await
+            .context("Could not fetch profile details")?;
 
         let country = match details {
-            Some(details) => {
-                self.ai
-                    .infer_country_of_living(&details.display_name, &details.description)
-                    .await
-                    .context("Could not infer country of living")
-                    ?
-            }
+            Some(details) => self
+                .ai
+                .infer_country_of_living(&details.display_name, &details.description)
+                .await
+                .context("Could not infer country of living")?,
             None => "xx".to_owned(),
         };
 
