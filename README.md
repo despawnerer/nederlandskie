@@ -17,7 +17,7 @@ Published on Bluesky at https://bsky.app/profile/did:plc:376mcc6k4s5p7qbtyjrgph5
 
 1. Set up a PostgreSQL database
 
-2. Create tables using SQL provided in [sql/01_create_tables.sql].
+2. Create tables using SQL provided in [`sql`](./sql) directory.
 
 3. Copy `.env.example` into `.env` and set up the environment variables within:
 
