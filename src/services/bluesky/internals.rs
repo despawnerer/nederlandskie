@@ -1,3 +1,2 @@
 pub mod cbor;
 pub mod ipld;
-pub mod xrpc;

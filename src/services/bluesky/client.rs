@@ -1,24 +1,21 @@
 use std::matches;
-use std::sync::Arc;
-use std::sync::Mutex;
 
 use anyhow::{anyhow, Result};
 use atrium_api::blob::BlobRef;
-use atrium_api::client::AtpServiceClient;
 use atrium_api::records::Record;
+use atrium_api::agent::{AtpAgent, Session};
+use atrium_xrpc::client::reqwest::ReqwestClient;
 use axum::http::StatusCode;
 use chrono::Utc;
 use futures::StreamExt;
 use log::error;
 use tokio_tungstenite::{connect_async, tungstenite};
 
-use super::entities::{ProfileDetails, Session};
-use super::internals::xrpc::AuthenticateableXrpcClient;
+use super::entities::{ProfileDetails};
 use super::streaming::{handle_message, CommitProcessor};
 
 pub struct Bluesky {
-    client: AtpServiceClient<AuthenticateableXrpcClient>,
-    session: Option<Arc<Mutex<Session>>>,
+    agent: AtpAgent<ReqwestClient>,
 }
 
 impl Bluesky {
@@ -27,56 +24,25 @@ impl Bluesky {
 
     pub fn unauthenticated() -> Self {
         Self {
-            client: AtpServiceClient::new(AuthenticateableXrpcClient::new(
-                Self::XRPC_HOST.to_owned(),
-            )),
-            session: None,
+            agent: AtpAgent::new(ReqwestClient::new(Self::XRPC_HOST.to_owned()))
         }
     }
 
     pub async fn login(handle: &str, password: &str) -> Result<Self> {
-        use atrium_api::com::atproto::server::create_session::Input;
+        let agent = AtpAgent::new(ReqwestClient::new(Self::XRPC_HOST.to_owned()));
+        agent.login(handle, password).await?;
 
-        let client =
-            AtpServiceClient::new(AuthenticateableXrpcClient::new(Self::XRPC_HOST.to_owned()));
-
-        let result = client
-            .service
-            .com
-            .atproto
-            .server
-            .create_session(Input {
-                identifier: handle.to_owned(),
-                password: password.to_owned(),
-            })
-            .await?;
-
-        let session = Arc::new(Mutex::new(result.try_into()?));
-
-        let authenticated_client = AtpServiceClient::new(AuthenticateableXrpcClient::with_session(
-            Self::XRPC_HOST.to_owned(),
-            session.clone(),
-        ));
-
-        Ok(Self {
-            client: authenticated_client,
-            session: Some(session),
-        })
+        Ok(Self { agent })
     }
 
     pub fn session(&self) -> Option<Session> {
-        self.session
-            .as_ref()
-            .and_then(|s| s.lock().ok())
-            .map(|s| s.clone())
+        self.agent.get_session()
     }
 
     pub async fn upload_blob(&self, blob: Vec<u8>) -> Result<BlobRef> {
-        self.ensure_token_valid().await?;
-
         let result = self
-            .client
-            .service
+            .agent
+            .api
             .com
             .atproto
             .repo
@@ -97,10 +63,8 @@ impl Bluesky {
     ) -> Result<()> {
         use atrium_api::com::atproto::repo::put_record::Input;
 
-        self.ensure_token_valid().await?;
-
-        self.client
-            .service
+        self.agent
+            .api
             .com
             .atproto
             .repo
@@ -130,8 +94,8 @@ impl Bluesky {
 
     pub async fn fetch_profile_details(&self, did: &str) -> Result<Option<ProfileDetails>> {
         let result = self
-            .client
-            .service
+            .agent
+            .api
             .com
             .atproto
             .repo
@@ -159,8 +123,8 @@ impl Bluesky {
         use atrium_api::com::atproto::identity::resolve_handle::Parameters;
 
         let result = self
-            .client
-            .service
+            .agent
+            .api
             .com
             .atproto
             .identity
@@ -199,40 +163,6 @@ impl Bluesky {
             if let Err(e) = handle_message(&message, processor).await {
                 error!("Error handling a message: {:?}", e);
             }
-        }
-
-        Ok(())
-    }
-
-    async fn ensure_token_valid(&self) -> Result<()> {
-        let access_jwt_exp = self
-            .session
-            .as_ref()
-            .ok_or_else(|| anyhow!("Not authenticated"))?
-            .lock()
-            .map_err(|e| anyhow!("session mutex is poisoned: {e}"))?
-            .access_jwt_exp;
-
-        let jwt_expired = Utc::now() > access_jwt_exp;
-
-        if jwt_expired {
-            let refreshed = self
-                .client
-                .service
-                .com
-                .atproto
-                .server
-                .refresh_session()
-                .await?;
-
-            let mut session = self
-                .session
-                .as_ref()
-                .ok_or_else(|| anyhow!("Not authenticated"))?
-                .lock()
-                .map_err(|e| anyhow!("session mutex is poisoned: {e}"))?;
-
-            *session = refreshed.try_into()?;
         }
 
         Ok(())
