@@ -8,6 +8,7 @@ The specific algorithm indexes and serves posts written in Russian language, by 
 - Language of posts is determined via [`lingua-rs`](https://crates.io/crates/lingua)
 - Country of residence is inferred from profile information through ChatGPT via [`chat-gpt-lib-rs`](https://crates.io/crates/chat-gpt-lib-rs)
 - Feed is served via [`axum`](https://crates.io/crates/axum)
+- Intefacing with Bluesky is implemented using [`atrium-api`](https://crates.io/crates/atrium-api)
 
 Deployed in production at https://nederlandskie.plansfortheday.org/
 
