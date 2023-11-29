@@ -23,7 +23,7 @@ impl ProfileClassifier {
         }
     }
 
-    pub async fn start(&self) -> Result<()> {
+    pub async fn start(self) -> Result<()> {
         info!("Starting");
 
         loop {

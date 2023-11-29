@@ -54,10 +54,10 @@ async fn main() -> Result<()> {
 
     info!("Starting everything up");
 
-    tokio::try_join!(
-        post_indexer.start(),
-        profile_classifier.start(),
-        feed_server.serve(),
+    let _ = tokio::try_join!(
+        tokio::spawn(post_indexer.start()),
+        tokio::spawn(profile_classifier.start()),
+        tokio::spawn(feed_server.serve()),
     )?;
 
     Ok(())

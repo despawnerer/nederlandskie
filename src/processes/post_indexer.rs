@@ -34,7 +34,7 @@ impl PostIndexer {
 }
 
 impl PostIndexer {
-    pub async fn start(&self) -> Result<()> {
+    pub async fn start(self) -> Result<()> {
         info!("Starting");
 
         loop {
