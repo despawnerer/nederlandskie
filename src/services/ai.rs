@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use chat_gpt_lib_rs::{ChatGPTClient, ChatInput, Message, Model, Role};
 
 pub struct AI {
@@ -35,7 +35,10 @@ impl AI {
 
         let response = self.chat_gpt_client.chat(chat_input).await?;
 
-        // TODO: Error handling?
-        Ok(response.choices[0].message.content.to_lowercase())
+        response
+            .choices
+            .get(0)
+            .map(|choice| choice.message.content.to_lowercase())
+            .ok_or_else(|| anyhow!("No choices received from ChatGPT, weird"))
     }
 }
