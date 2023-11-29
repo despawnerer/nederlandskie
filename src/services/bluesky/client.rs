@@ -19,13 +19,13 @@ pub struct Bluesky {
 }
 
 impl Bluesky {
-    pub const XRPC_HOST: &str = "https://bsky.social";
-    pub const FIREHOSE_HOST: &str = "wss://bsky.network";
+    pub const XRPC_HOST: &'static str = "https://bsky.social";
+    pub const FIREHOSE_HOST: &'static str = "wss://bsky.network";
 
     pub fn unauthenticated() -> Self {
         Self {
             agent: AtpAgent::new(
-                ReqwestClient::new(Self::XRPC_HOST.to_owned()),
+                ReqwestClient::new(Self::XRPC_HOST),
                 MemorySessionStore::default(),
             ),
         }
@@ -33,7 +33,7 @@ impl Bluesky {
 
     pub async fn login(handle: &str, password: &str) -> Result<Self> {
         let agent = AtpAgent::new(
-            ReqwestClient::new(Self::XRPC_HOST.to_owned()),
+            ReqwestClient::new(Self::XRPC_HOST),
             MemorySessionStore::default(),
         );
         agent.login(handle, password).await?;

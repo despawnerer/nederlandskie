@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
     }
 
     for did in &args.did {
-        database.force_profile_country(&did, &args.country).await?;
+        database.force_profile_country(did, &args.country).await?;
 
         println!(
             "Stored '{}' as the country for profile with did '{}'",

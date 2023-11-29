@@ -43,7 +43,7 @@ impl Algo for Nederlandskie {
         author_did: &str,
         post: &bluesky::PostRecord,
     ) -> Result<bool> {
-        Ok(self.is_post_in_russian(&post)
+        Ok(self.is_post_in_russian(post)
             || self.is_profile_residing_in_netherlands(author_did).await?)
     }
 
