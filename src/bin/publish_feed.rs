@@ -45,6 +45,11 @@ async fn main() -> Result<()> {
 
     let bluesky = Bluesky::login(&handle, &password).await?;
 
+    let publisher_did = bluesky
+        .resolve_handle(&handle)
+        .await?
+        .expect("couldn't resolve our own handle, huh?");
+
     let mut avatar = None;
     if let Some(path) = args.avatar_filename {
         let bytes = std::fs::read(path)?;
@@ -54,7 +59,7 @@ async fn main() -> Result<()> {
 
     bluesky
         .publish_feed(
-            &bluesky.session().unwrap().did,
+            &publisher_did,
             &feed_generator_did,
             &args.name,
             &args.display_name,

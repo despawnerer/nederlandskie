@@ -1,9 +1,8 @@
-use std::net::SocketAddr;
 use std::sync::Arc;
 
 use anyhow::Result;
 use axum::routing::get;
-use axum::{Router, Server};
+use axum::Router;
 use log::info;
 
 use crate::algos::Algos;
@@ -46,11 +45,11 @@ impl FeedServer {
                 algos: self.algos,
             });
 
-        let addr = SocketAddr::from(([0, 0, 0, 0], 3030));
-
+        let addr = "0.0.0.0:3030";
         info!("Serving feed on {}", addr);
 
-        Server::bind(&addr).serve(app.into_make_service()).await?;
+        let listener = tokio::net::TcpListener::bind(addr).await?;
+        axum::serve(listener, app).await?;
         Ok(())
     }
 }

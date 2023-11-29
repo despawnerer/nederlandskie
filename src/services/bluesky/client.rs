@@ -1,13 +1,13 @@
 use std::matches;
 
 use anyhow::{anyhow, Result};
-use atrium_api::agent::{AtpAgent, Session};
+use atrium_api::agent::{store::MemorySessionStore, AtpAgent};
 use atrium_api::blob::BlobRef;
 use atrium_api::records::Record;
-use atrium_xrpc::client::reqwest::ReqwestClient;
-use axum::http::StatusCode;
+use atrium_xrpc_client::reqwest::ReqwestClient;
 use chrono::Utc;
 use futures::StreamExt;
+use http::StatusCode;
 use log::error;
 use tokio_tungstenite::{connect_async, tungstenite};
 
@@ -15,7 +15,7 @@ use super::entities::ProfileDetails;
 use super::streaming::{handle_message, CommitProcessor};
 
 pub struct Bluesky {
-    agent: AtpAgent<ReqwestClient>,
+    agent: AtpAgent<MemorySessionStore, ReqwestClient>,
 }
 
 impl Bluesky {
@@ -24,19 +24,21 @@ impl Bluesky {
 
     pub fn unauthenticated() -> Self {
         Self {
-            agent: AtpAgent::new(ReqwestClient::new(Self::XRPC_HOST.to_owned())),
+            agent: AtpAgent::new(
+                ReqwestClient::new(Self::XRPC_HOST.to_owned()),
+                MemorySessionStore::default(),
+            ),
         }
     }
 
     pub async fn login(handle: &str, password: &str) -> Result<Self> {
-        let agent = AtpAgent::new(ReqwestClient::new(Self::XRPC_HOST.to_owned()));
+        let agent = AtpAgent::new(
+            ReqwestClient::new(Self::XRPC_HOST.to_owned()),
+            MemorySessionStore::default(),
+        );
         agent.login(handle, password).await?;
 
         Ok(Self { agent })
-    }
-
-    pub fn session(&self) -> Option<Session> {
-        self.agent.get_session()
     }
 
     pub async fn upload_blob(&self, blob: Vec<u8>) -> Result<BlobRef> {
@@ -167,13 +169,18 @@ fn is_missing_record_error<T>(error: &atrium_xrpc::error::Error<T>) -> bool {
 
     matches!(error,
         Error::XrpcResponse(XrpcError {
-            status: StatusCode::BAD_REQUEST,
+            status,
             error:
                 Some(XrpcErrorKind::Undefined(ErrorResponseBody {
                     error: Some(error_code),
                     message: Some(error_message),
                 })),
-        }) if error_code == "InvalidRequest"
+        }) if
+            // FIXME: This is this way instead of pattern matching because atrium's
+            //        version of http is pegged at like 0.2.x and it does not
+            //        re-export it so we have no way of referencing the real type
+            status.as_u16() == StatusCode::BAD_REQUEST.as_u16()
+            && error_code == "InvalidRequest"
             && error_message.starts_with("Could not locate record")
     )
 }
@@ -183,13 +190,18 @@ fn is_unable_to_resolve_handle_error<T>(error: &atrium_xrpc::error::Error<T>) ->
 
     matches!(error,
         Error::XrpcResponse(XrpcError {
-            status: StatusCode::BAD_REQUEST,
+            status,
             error:
                 Some(XrpcErrorKind::Undefined(ErrorResponseBody {
                     error: Some(error_code),
                     message: Some(error_message),
                 })),
-        }) if error_code == "InvalidRequest"
+        }) if
+            // FIXME: This is this way instead of pattern matching because atrium's
+            //        version of http is pegged at like 0.2.x and it does not
+            //        re-export it so we have no way of referencing the real type
+            status.as_u16() == StatusCode::BAD_REQUEST.as_u16()
+            && error_code == "InvalidRequest"
             && error_message.starts_with("Unable to resolve handle")
     )
 }
