@@ -18,7 +18,6 @@ chrono = "0.4.31"
 clap = { version = "4.4.16", features = ["derive"] }
 dotenv = "0.15.0"
 env_logger = "0.10.1"
-futures = "0.3.30"
 http = "1.0.0"
 libipld-core = { version = "0.16.0", features = ["serde-codec"] }
 lingua = "1.6.2"
@@ -31,4 +30,5 @@ serde_ipld_dagcbor = "0.4.2"
 sk-cbor = "0.1.2"
 sqlx = { version = "0.7.3", default-features = false, features = ["postgres", "runtime-tokio-native-tls", "chrono"] }
 tokio = { version = "1.35.1", features = ["full"] }
+tokio-stream = "0.1.14"
 tokio-tungstenite = { version = "0.21.0", features = ["native-tls"] }

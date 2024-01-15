@@ -2365,7 +2365,6 @@ dependencies = [
  "clap",
  "dotenv",
  "env_logger",
- "futures",
  "http 1.0.0",
  "libipld-core",
  "lingua",
@@ -2378,6 +2377,7 @@ dependencies = [
  "sk-cbor",
  "sqlx",
  "tokio",
+ "tokio-stream",
  "tokio-tungstenite",
 ]
 

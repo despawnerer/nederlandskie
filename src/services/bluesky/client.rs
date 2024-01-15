@@ -1,4 +1,5 @@
 use std::matches;
+use std::time::Duration;
 
 use anyhow::{anyhow, Result};
 use atrium_api::agent::{store::MemorySessionStore, AtpAgent};
@@ -6,9 +7,9 @@ use atrium_api::blob::BlobRef;
 use atrium_api::records::Record;
 use atrium_xrpc_client::reqwest::ReqwestClient;
 use chrono::Utc;
-use futures::StreamExt;
 use http::StatusCode;
 use log::error;
+use tokio_stream::StreamExt;
 use tokio_tungstenite::{connect_async, tungstenite};
 
 use super::entities::ProfileDetails;
@@ -21,6 +22,7 @@ pub struct Bluesky {
 impl Bluesky {
     pub const XRPC_HOST: &'static str = "https://bsky.social";
     pub const FIREHOSE_HOST: &'static str = "wss://bsky.network";
+    pub const STREAMING_TIMEOUT: Duration = Duration::from_secs(60);
 
     pub fn unauthenticated() -> Self {
         Self {
@@ -152,9 +154,11 @@ impl Bluesky {
             ),
         };
 
-        let (mut stream, _) = connect_async(url).await?;
+        let (stream, _) = connect_async(url).await?;
+        let stream = stream.timeout(Self::STREAMING_TIMEOUT);
+        let mut stream = Box::pin(stream);
 
-        while let Some(Ok(tungstenite::Message::Binary(message))) = stream.next().await {
+        while let Some(Ok(tungstenite::Message::Binary(message))) = stream.try_next().await? {
             if let Err(e) = handle_message(&message, processor).await {
                 error!("Error handling a message: {:?}", e);
             }
