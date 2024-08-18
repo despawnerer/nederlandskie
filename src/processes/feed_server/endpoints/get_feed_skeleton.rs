@@ -3,7 +3,7 @@ use std::sync::Arc;
 use anyhow::anyhow;
 use atrium_api::app::bsky::feed::defs::SkeletonFeedPostData;
 use atrium_api::app::bsky::feed::get_feed_skeleton::{
-    OutputData as FeedSkeleton, Parameters as FeedSkeletonQuery,
+    OutputData as FeedSkeleton, ParametersData as FeedSkeletonQuery,
 };
 use atrium_api::types::{LimitedNonZeroU8, Object};
 use axum::extract::{Query, State};
