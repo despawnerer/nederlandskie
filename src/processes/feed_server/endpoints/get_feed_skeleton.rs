@@ -1,10 +1,11 @@
 use std::sync::Arc;
 
 use anyhow::anyhow;
-use atrium_api::app::bsky::feed::defs::SkeletonFeedPost;
+use atrium_api::app::bsky::feed::defs::SkeletonFeedPostData;
 use atrium_api::app::bsky::feed::get_feed_skeleton::{
-    Output as FeedSkeleton, Parameters as FeedSkeletonQuery,
+    OutputData as FeedSkeleton, Parameters as FeedSkeletonQuery,
 };
+use atrium_api::types::{LimitedNonZeroU8, Object};
 use axum::extract::{Query, State};
 use axum::Json;
 use chrono::{DateTime, TimeZone, Utc};
@@ -28,17 +29,23 @@ pub async fn get_feed_skeleton(
         .get_by_name(feed_name)
         .ok_or_else(|| AppError::FeedNotFound(feed_name.to_owned()))?;
 
-    let limit = query.limit.unwrap_or(20);
+    let limit = query
+        .limit
+        .unwrap_or(LimitedNonZeroU8::try_from(20).expect("this default limit should always work"));
     let earlier_than = query.cursor.as_deref().map(parse_cursor).transpose()?;
 
-    let posts = algo.fetch_posts(&database, limit, earlier_than).await?;
+    let posts = algo
+        .fetch_posts(&database, limit.into(), earlier_than)
+        .await?;
 
     let feed = posts
         .iter()
-        .map(|p| SkeletonFeedPost {
+        .map(|p| SkeletonFeedPostData {
             post: p.uri.clone(),
+            feed_context: None,
             reason: None,
         })
+        .map(Object::from)
         .collect();
 
     let cursor = posts.last().map(|p| make_cursor(&p.indexed_at, &p.cid));

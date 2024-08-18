@@ -25,7 +25,7 @@ pub struct Service {
 pub async fn did_json(State(config): State<Arc<Config>>) -> Json<Did> {
     Json(Did {
         context: vec!["https://www.w3.org/ns/did/v1".to_owned()],
-        id: config.feed_generator_did.clone(),
+        id: config.feed_generator_did.to_string(),
         service: vec![Service {
             id: "#bsky_fg".to_owned(),
             type_: "BskyFeedGenerator".to_owned(),

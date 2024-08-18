@@ -2,7 +2,8 @@ use std::collections::HashMap;
 
 use anyhow::Result;
 use async_trait::async_trait;
-use atrium_api::com::atproto::sync::subscribe_repos::{Commit, Message};
+use atrium_api::com::atproto::sync::subscribe_repos::Commit;
+use atrium_api::types::Collection;
 use chrono::{DateTime, Utc};
 
 use super::{
@@ -10,10 +11,6 @@ use super::{
     internals::cbor::read_record,
     internals::ipld::Frame,
 };
-
-const COLLECTION_POST: &str = "app.bsky.feed.post";
-const COLLECTION_LIKE: &str = "app.bsky.feed.like";
-const COLLECTION_FOLLOW: &str = "app.bsky.graph.follow";
 
 const ACTION_CREATE: &str = "create";
 const ACTION_DELETE: &str = "delete";
@@ -24,7 +21,7 @@ pub trait CommitProcessor {
 }
 
 pub struct CommitDetails {
-    pub seq: i32,
+    pub seq: i64,
     pub time: DateTime<Utc>,
     pub operations: Vec<Operation>,
 }
@@ -71,7 +68,7 @@ pub async fn handle_message<P: CommitProcessor>(message: &[u8], processor: &P) -
     processor
         .process_commit(&CommitDetails {
             seq: commit.seq,
-            time: commit.time.parse()?,
+            time: (*commit.time.as_ref()).into(),
             operations,
         })
         .await?;
@@ -81,10 +78,14 @@ pub async fn handle_message<P: CommitProcessor>(message: &[u8], processor: &P) -
 
 fn parse_commit_from_message(message: &[u8]) -> Result<Option<Commit>> {
     match Frame::try_from(message)? {
-        Frame::Message(message) => match message.body {
-            Message::Commit(commit) => Ok(Some(*commit)),
-            _ => Ok(None),
-        },
+        Frame::Message(Some(t), message) => {
+            if t == "#commit" {
+                Ok(serde_ipld_dagcbor::from_reader(message.body.as_slice())?)
+            } else {
+                Ok(None)
+            }
+        }
+        Frame::Message(None, _) => Ok(None),
         Frame::Error(err) => panic!("Frame error: {err:?}"),
     }
 }
@@ -93,17 +94,20 @@ async fn extract_operations(commit: &Commit) -> Result<Vec<Operation>> {
     let mut operations = Vec::new();
 
     let (blocks, _header) = rs_car::car_read_all(&mut commit.blocks.as_slice(), true).await?;
-    let blocks_by_cid: HashMap<_, _> = blocks.into_iter().collect();
+    let blocks_by_cid: HashMap<_, _> = blocks
+        .into_iter()
+        .map(|(cid, block)| (cid.to_string(), block))
+        .collect();
 
     for op in &commit.ops {
         let collection = op.path.split('/').next().expect("op.path is empty");
         let action = op.action.as_str();
-        let uri = format!("at://{}/{}", commit.repo, op.path);
+        let uri = format!("at://{}/{}", commit.repo.as_str(), op.path);
 
         let operation = match action {
             ACTION_CREATE => {
-                let cid = match op.cid {
-                    Some(cid) => cid,
+                let cid = match &op.cid {
+                    Some(cid_link) => cid_link.0.to_string(),
                     None => continue,
                 };
 
@@ -113,31 +117,31 @@ async fn extract_operations(commit: &Commit) -> Result<Vec<Operation>> {
                 };
 
                 match collection {
-                    COLLECTION_POST => {
+                    atrium_api::app::bsky::feed::Post::NSID => {
                         let post: PostRecord = read_record(block)?;
 
                         Operation::CreatePost {
-                            author_did: commit.repo.clone(),
+                            author_did: commit.repo.to_string(),
                             cid: cid.to_string(),
                             uri,
                             post,
                         }
                     }
-                    COLLECTION_LIKE => {
+                    atrium_api::app::bsky::feed::Like::NSID => {
                         let like: LikeRecord = read_record(block)?;
 
                         Operation::CreateLike {
-                            author_did: commit.repo.clone(),
+                            author_did: commit.repo.to_string(),
                             cid: cid.to_string(),
                             uri,
                             like,
                         }
                     }
-                    COLLECTION_FOLLOW => {
+                    atrium_api::app::bsky::graph::Follow::NSID => {
                         let follow: FollowRecord = read_record(block)?;
 
                         Operation::CreateFollow {
-                            author_did: commit.repo.clone(),
+                            author_did: commit.repo.to_string(),
                             cid: cid.to_string(),
                             uri,
                             follow,
@@ -147,9 +151,9 @@ async fn extract_operations(commit: &Commit) -> Result<Vec<Operation>> {
                 }
             }
             ACTION_DELETE => match collection {
-                COLLECTION_POST => Operation::DeletePost { uri },
-                COLLECTION_LIKE => Operation::DeleteLike { uri },
-                COLLECTION_FOLLOW => Operation::DeleteFollow { uri },
+                atrium_api::app::bsky::feed::Post::NSID => Operation::DeletePost { uri },
+                atrium_api::app::bsky::feed::Like::NSID => Operation::DeleteLike { uri },
+                atrium_api::app::bsky::graph::Follow::NSID => Operation::DeleteFollow { uri },
                 _ => continue,
             },
             _ => continue,

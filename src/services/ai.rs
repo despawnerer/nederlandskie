@@ -37,7 +37,7 @@ impl AI {
 
         response
             .choices
-            .get(0)
+            .first()
             .map(|choice| choice.message.content.to_lowercase())
             .ok_or_else(|| anyhow!("No choices received from ChatGPT, weird"))
     }

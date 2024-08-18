@@ -251,7 +251,7 @@ impl Database {
         &self,
         host: &str,
         did: &str,
-        cursor: i32,
+        cursor: i64,
     ) -> Result<bool> {
         let mut params = Parameters::new();
 

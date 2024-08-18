@@ -1,8 +1,9 @@
 use std::sync::Arc;
 
 use atrium_api::app::bsky::feed::describe_feed_generator::{
-    Feed, Output as FeedGeneratorDescription,
+    FeedData, OutputData as FeedGeneratorDescription,
 };
+use atrium_api::types::Object;
 use axum::{extract::State, Json};
 
 use crate::{algos::Algos, config::Config};
@@ -15,12 +16,14 @@ pub async fn describe_feed_generator(
         did: config.feed_generator_did.clone(),
         feeds: algos
             .iter_names()
-            .map(|name| Feed {
+            .map(|name| FeedData {
                 uri: format!(
                     "at://{}/app.bsky.feed.generator/{}",
-                    config.publisher_did, name
+                    config.publisher_did.as_ref(),
+                    name
                 ),
             })
+            .map(Object::from)
             .collect(),
         links: None,
     })

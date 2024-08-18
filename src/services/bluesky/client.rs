@@ -1,12 +1,12 @@
+use std::fmt::Debug;
 use std::matches;
 use std::time::Duration;
 
-use anyhow::{anyhow, Result};
+use anyhow::Result;
 use atrium_api::agent::{store::MemorySessionStore, AtpAgent};
-use atrium_api::blob::BlobRef;
-use atrium_api::records::Record;
+use atrium_api::types::string::Datetime;
+use atrium_api::types::{BlobRef, Collection, Object, TryIntoUnknown};
 use atrium_xrpc_client::reqwest::ReqwestClient;
-use chrono::Utc;
 use http::StatusCode;
 use log::error;
 use tokio_stream::StreamExt;
@@ -46,7 +46,7 @@ impl Bluesky {
     pub async fn upload_blob(&self, blob: Vec<u8>) -> Result<BlobRef> {
         let result = self.agent.api.com.atproto.repo.upload_blob(blob).await?;
 
-        Ok(result.blob)
+        Ok(result.data.blob)
     }
 
     pub async fn publish_feed(
@@ -58,66 +58,71 @@ impl Bluesky {
         description: &str,
         avatar: Option<BlobRef>,
     ) -> Result<()> {
-        use atrium_api::com::atproto::repo::put_record::Input;
+        use atrium_api::com::atproto::repo::put_record::InputData;
 
         self.agent
             .api
             .com
             .atproto
             .repo
-            .put_record(Input {
-                collection: "app.bsky.feed.generator".to_owned(),
-                record: Record::AppBskyFeedGenerator(Box::new(
-                    atrium_api::app::bsky::feed::generator::Record {
+            .put_record(
+                InputData {
+                    collection: atrium_api::app::bsky::feed::Generator::nsid(),
+                    record: atrium_api::app::bsky::feed::generator::RecordData {
                         avatar,
-                        created_at: Utc::now().to_rfc3339(),
+                        created_at: Datetime::now(),
                         description: Some(description.to_owned()),
                         description_facets: None,
-                        did: feed_generator_did.to_owned(),
+                        did: feed_generator_did.parse().map_err(anyhow::Error::msg)?,
                         display_name: display_name.to_owned(),
                         labels: None,
-                    },
-                )),
-                repo: publisher_did.to_owned(),
-                rkey: name.to_owned(),
-                swap_commit: None,
-                swap_record: None,
-                validate: None,
-            })
+                        accepts_interactions: None,
+                    }
+                    .try_into_unknown()?,
+                    repo: publisher_did.parse().map_err(anyhow::Error::msg)?,
+                    rkey: name.to_owned(),
+                    swap_commit: None,
+                    swap_record: None,
+                    validate: None,
+                }
+                .into(),
+            )
             .await?;
 
         Ok(())
     }
 
     pub async fn fetch_profile_details(&self, did: &str) -> Result<Option<ProfileDetails>> {
+        use atrium_api::com::atproto::repo::get_record::ParametersData;
+
         let result = self
             .agent
             .api
             .com
             .atproto
             .repo
-            .get_record(atrium_api::com::atproto::repo::get_record::Parameters {
-                collection: "app.bsky.actor.profile".to_owned(),
-                cid: None,
-                repo: did.to_owned(),
-                rkey: "self".to_owned(),
-            })
+            .get_record(
+                ParametersData {
+                    collection: atrium_api::app::bsky::actor::Profile::nsid(),
+                    cid: None,
+                    repo: did.parse().map_err(anyhow::Error::msg)?,
+                    rkey: "self".to_owned(),
+                }
+                .into(),
+            )
             .await;
 
-        let profile_data = match result {
-            Ok(profile_data) => profile_data,
+        let profile_output = match result {
+            Ok(profile_output) => profile_output,
             Err(e) if is_missing_record_error(&e) => return Ok(None),
             Err(e) => return Err(e.into()),
         };
 
-        match profile_data.value {
-            Record::AppBskyActorProfile(profile) => Ok(Some(ProfileDetails::from(*profile))),
-            _ => Err(anyhow!("Wrong type of record")),
-        }
+        Ok(Some(ProfileDetails::try_from(profile_output.data.value)?))
     }
 
     pub async fn resolve_handle(&self, handle: &str) -> Result<Option<String>> {
-        use atrium_api::com::atproto::identity::resolve_handle::Parameters;
+        use atrium_api::com::atproto::identity::resolve_handle::ParametersData;
 
         let result = self
             .agent
@@ -125,13 +130,13 @@ impl Bluesky {
             .com
             .atproto
             .identity
-            .resolve_handle(Parameters {
-                handle: handle.to_owned(),
-            })
+            .resolve_handle(Object::from(ParametersData {
+                handle: handle.parse().map_err(anyhow::Error::msg)?,
+            }))
             .await;
 
         match result {
-            Ok(result) => Ok(Some(result.did)),
+            Ok(result) => Ok(Some(result.did.to_string())),
             Err(e) if is_unable_to_resolve_handle_error(&e) => Ok(None),
             Err(e) => Err(e.into()),
         }
@@ -168,7 +173,10 @@ impl Bluesky {
     }
 }
 
-fn is_missing_record_error<T>(error: &atrium_xrpc::error::Error<T>) -> bool {
+fn is_missing_record_error<T>(error: &atrium_xrpc::error::Error<T>) -> bool
+where
+    T: Debug,
+{
     use atrium_xrpc::error::{Error, ErrorResponseBody, XrpcError, XrpcErrorKind};
 
     matches!(error,
@@ -189,7 +197,10 @@ fn is_missing_record_error<T>(error: &atrium_xrpc::error::Error<T>) -> bool {
     )
 }
 
-fn is_unable_to_resolve_handle_error<T>(error: &atrium_xrpc::error::Error<T>) -> bool {
+fn is_unable_to_resolve_handle_error<T>(error: &atrium_xrpc::error::Error<T>) -> bool
+where
+    T: Debug,
+{
     use atrium_xrpc::error::{Error, ErrorResponseBody, XrpcError, XrpcErrorKind};
 
     matches!(error,

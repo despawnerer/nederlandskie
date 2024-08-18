@@ -19,7 +19,7 @@ pub trait Algo {
     async fn fetch_posts(
         &self,
         database: &Database,
-        limit: i32,
+        limit: u8,
         earlier_than: Option<(DateTime<Utc>, &str)>,
     ) -> Result<Vec<database::Post>>;
 }

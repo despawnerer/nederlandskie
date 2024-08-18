@@ -7,28 +7,28 @@ default-run = "nederlandskie"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0.79"
-async-trait = "0.1.77"
-atrium-api = "0.15.0"
-atrium-xrpc = "0.8.0"
-atrium-xrpc-client = "0.2.0"
-axum = "0.7.4"
-chat-gpt-lib-rs = "0.3.2"
-chrono = "0.4.31"
-clap = { version = "4.4.16", features = ["derive"] }
+anyhow = "1.0.86"
+async-trait = "0.1.81"
+atrium-api = "0.24.2"
+atrium-xrpc = "0.11.3"
+atrium-xrpc-client = "0.5.6"
+axum = "0.7.5"
+chat-gpt-lib-rs = "0.5.1"
+chrono = "0.4.38"
+clap = { version = "4.5.16", features = ["derive"] }
 dotenv = "0.15.0"
-env_logger = "0.10.1"
-http = "1.0.0"
-libipld-core = { version = "0.16.0", features = ["serde-codec"] }
+env_logger = "0.11.5"
+http = "1.1.0"
+ipld-core = "0.4.1"
 lingua = "1.6.2"
-log = "0.4.20"
+log = "0.4.22"
 once_cell = "1.19.0"
 rs-car = "0.4.1"
 scooby = "0.5.0"
-serde = "1.0.195"
-serde_ipld_dagcbor = "0.4.2"
+serde = "1.0.208"
+serde_ipld_dagcbor = "0.6.1"
 sk-cbor = "0.1.2"
-sqlx = { version = "0.7.3", default-features = false, features = ["postgres", "runtime-tokio-native-tls", "chrono"] }
-tokio = { version = "1.35.1", features = ["full"] }
-tokio-stream = "0.1.14"
-tokio-tungstenite = { version = "0.21.0", features = ["native-tls"] }
+sqlx = { version = "0.8.0", default-features = false, features = ["postgres", "runtime-tokio-native-tls", "chrono"] }
+tokio = { version = "1.39.2", features = ["full"] }
+tokio-stream = "0.1.15"
+tokio-tungstenite = { version = "0.23.1", features = ["native-tls"] }
