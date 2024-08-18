@@ -53,3 +53,15 @@ The feed will be available at http://localhost:3030/.
 ### Force a profile to be in a certain country
 
 `cargo run --bin force_profile_country -- --help`
+
+## Cross-compiling on non-Linux machines to deploy on Linux
+
+1. Install `cross` by following their [installation guide](https://github.com/cross-rs/cross)
+
+2. Build the binaries in release mode:
+
+  ```
+  cross build --release
+  ```
+
+3. Deploy the binaries in `target/x86_64-unknown-linux-gnu/release/` as you see fit
