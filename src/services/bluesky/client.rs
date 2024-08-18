@@ -114,7 +114,7 @@ impl Bluesky {
 
         let profile_output = match result {
             Ok(profile_output) => profile_output,
-            Err(e) if is_missing_record_error(&e) => return Ok(None),
+            Err(e) if is_missing_repo_error(&e) => return Ok(None),
             Err(e) => return Err(e.into()),
         };
 
@@ -173,7 +173,7 @@ impl Bluesky {
     }
 }
 
-fn is_missing_record_error<T>(error: &atrium_xrpc::error::Error<T>) -> bool
+fn is_missing_repo_error<T>(error: &atrium_xrpc::error::Error<T>) -> bool
 where
     T: Debug,
 {
@@ -193,7 +193,7 @@ where
             //        re-export it so we have no way of referencing the real type
             status.as_u16() == StatusCode::BAD_REQUEST.as_u16()
             && error_code == "InvalidRequest"
-            && error_message.starts_with("Could not locate record")
+            && error_message.starts_with("Could not find repo")
     )
 }
 
