@@ -15,6 +15,9 @@ RUN mkdir -p /app && mv target/release/nederlandskie /app/
 # FROM mcr.microsoft.com/cbl-mariner/distroless/base:2.0
 FROM debian:bullseye-slim
 
+RUN apt-get update && apt-get install -y ca-certificates
+RUN update-ca-certificates
+
 COPY --from=builder /app /app
 
 WORKDIR /app
