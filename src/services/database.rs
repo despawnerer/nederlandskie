@@ -213,7 +213,7 @@ impl Database {
         .await?)
     }
 
-    pub async fn fetch_subscription_cursor(&self, host: &str, did: &str) -> Result<Option<i32>> {
+    pub async fn fetch_subscription_cursor(&self, host: &str, did: &str) -> Result<Option<i64>> {
         let mut params = Parameters::new();
 
         Ok(query(

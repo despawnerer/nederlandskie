@@ -145,7 +145,7 @@ impl Bluesky {
     pub async fn subscribe_to_operations<P: CommitProcessor>(
         &self,
         processor: &P,
-        cursor: Option<i32>,
+        cursor: Option<i64>,
     ) -> Result<()> {
         let url = match cursor {
             Some(cursor) => format!(
