@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  db:
+    image: mcr.microsoft.com/cbl-mariner/base/postgres:14
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    networks:
+      - backend
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+      - db:/var/lib/postgresql/data
+  api:
+    build:
+      context: .
+      dockerfile: dkr/app.dockerfile
+    command: 'launch'
+    image: nederlandskie
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
+    networks:
+      - backend
+    # environment:
+    #   DATABASE_URL: 'postgres://postgres:postgres@db/nederlandskie'
+    volumes:
+      - ./.env:/app/.env
+    links:
+      - db
+
+networks:
+  backend:
+
+
+volumes:
+  db:
+    driver: local
