@@ -115,6 +115,7 @@ impl Bluesky {
         let profile_output = match result {
             Ok(profile_output) => profile_output,
             Err(e) if is_missing_repo_error(&e) => return Ok(None),
+            Err(e) if is_record_not_found_error(&e) => return Ok(None),
             Err(e) => return Err(e.into()),
         };
 
@@ -194,6 +195,29 @@ where
             status.as_u16() == StatusCode::BAD_REQUEST.as_u16()
             && error_code == "InvalidRequest"
             && error_message.starts_with("Could not find repo")
+    )
+}
+
+fn is_record_not_found_error<T>(error: &atrium_xrpc::error::Error<T>) -> bool
+where
+    T: Debug,
+{
+    use atrium_xrpc::error::{Error, ErrorResponseBody, XrpcError, XrpcErrorKind};
+
+    matches!(error,
+        Error::XrpcResponse(XrpcError {
+            status,
+            error:
+                Some(XrpcErrorKind::Undefined(ErrorResponseBody {
+                    error: Some(error_code),
+                    message: Some(error_message),
+                })),
+        }) if
+            // FIXME: This is this way instead of pattern matching because atrium's
+            //        version of http is pegged at like 0.2.x and it does not
+            //        re-export it so we have no way of referencing the real type
+            status.as_u16() == StatusCode::BAD_REQUEST.as_u16()
+            && error_code == "RecordNotFound"
     )
 }
 
