@@ -1,0 +1,11 @@
+[package]
+name = "nederlandskie-tools"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+nederlandskie-core = { path = "../core" }
+anyhow = "1.0.86"
+clap = { version = "4.5.16", features = ["derive"] }
+dotenv = "0.15.0"
+tokio = { version = "1.41.1", features = ["full"] }

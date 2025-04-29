@@ -1,0 +1,25 @@
+[package]
+name = "nederlandskie-feed-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+nederlandskie-core = { path = "../../core" }
+anyhow = "1.0.86"
+async-trait = "0.1.81"
+atrium-api = "0.24.2"
+atrium-xrpc = "0.11.3"
+atrium-xrpc-client = "0.5.6"
+axum = "0.7.5"
+chat-gpt-lib-rs = "0.5.1"
+chrono = "0.4.38"
+clap = { version = "4.5.16", features = ["derive"] }
+dotenv = "0.15.0"
+env_logger = "0.11.5"
+http = "1.1.0"
+ipld-core = "0.4.1"
+log = "0.4.22"
+serde = "1.0.208"
+tokio = { version = "1.41.1", features = ["full"] }
+tokio-stream = "0.1.16"
+tokio-tungstenite = { version = "0.23.1", features = ["native-tls"] }

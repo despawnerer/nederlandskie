@@ -16,11 +16,7 @@ Published on Bluesky at https://bsky.app/profile/did:plc:376mcc6k4s5p7qbtyjrgph5
 
 ## Setup
 
-1. Set up a PostgreSQL database
-
-2. Create tables using SQL provided in [`sql`](./sql) directory.
-
-3. Copy `.env.example` into `.env` and set up the environment variables within:
+1. Copy `.env.example` into `.env` and set up the environment variables within:
 
    - `PUBLISHER_BLUESKY_HANDLE` to your Bluesky handle
    - `PUBLISHER_BLUESKY_PASSWORD` to Bluesky app password that you created in settings
@@ -28,19 +24,23 @@ Published on Bluesky at https://bsky.app/profile/did:plc:376mcc6k4s5p7qbtyjrgph5
    - `DATABASE_URL` for PostgreSQL credentials
    - `FEED_GENERATOR_HOSTNAME` to the hostname of where you intend to host the feed
 
-4. Determine your own DID and put it in `PUBLISHER_DID` env variable in `.env`:
+2. Determine your own DID and put it in `PUBLISHER_DID` env variable in `.env`:
 
    ```
    cargo run --bin who_am_i
    ```
 
-## Running
+## Running for development
 
-### Populate and serve the feed
+1. Make sure you have docker-compose set up and functioning
 
-`cargo run`
+2. Start the processes through the included `Makefile`:
 
-The feed will be available at http://localhost:3030/.
+   `make run-dev`
+
+   The feed will be available at http://localhost:3030/.
+
+## Tools
 
 ### Determine your own did for publishing
 
@@ -61,7 +61,7 @@ The feed will be available at http://localhost:3030/.
 2. Build the binaries in release mode:
 
   ```
-  cross build --release
+  make cross-build-release
   ```
 
 3. Deploy the binaries in `target/x86_64-unknown-linux-gnu/release/` as you see fit

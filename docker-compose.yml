@@ -1,0 +1,66 @@
+services:
+  db:
+    image: mcr.microsoft.com/cbl-mariner/base/postgres:14
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=nederlandskie
+    ports:
+      - '5432:5432'
+    networks:
+      - backend
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+      - db:/var/lib/postgresql/data
+  feed-server:
+    build:
+      context: .
+    command: '/bin/nederlandskie-feed-server'
+    image: nederlandskie
+    depends_on:
+      - db
+    ports:
+      - 8000:8000
+    networks:
+      - backend
+    volumes:
+      - ./.env:/app/.env
+    links:
+      - db
+  post-indexer:
+    build:
+      context: .
+    command: '/bin/nederlandskie-post-indexer'
+    image: nederlandskie
+    depends_on:
+      - db
+    networks:
+      - backend
+    volumes:
+      - ./.env:/app/.env
+    links:
+      - db
+  profile-classifier:
+    build:
+      context: .
+    command: '/bin/nederlandskie-profile-classifier'
+    image: nederlandskie
+    depends_on:
+      - db
+    networks:
+      - backend
+
+    volumes:
+      - ./.env:/app/.env
+    links:
+      - db
+
+
+networks:
+  backend:
+
+
+volumes:
+  db:
+    driver: local

@@ -1,0 +1,13 @@
+[package]
+name = "nederlandskie-post-indexer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+nederlandskie-core = { path = "../../core" }
+anyhow = "1.0.86"
+async-trait = "0.1.81"
+env_logger = "0.11.5"
+lingua = "1.6.2"
+log = "0.4.22"
+tokio = { version = "1.41.1", features = ["full"] }
