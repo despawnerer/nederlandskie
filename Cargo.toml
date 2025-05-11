@@ -4,6 +4,7 @@ members = [
     "processes/feed_server",
     "processes/post_indexer",
     "processes/profile_classifier",
+    "processes/janitor",
     "tools"
 ]
 resolver = "2"

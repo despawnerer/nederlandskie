@@ -1,0 +1,13 @@
+[package]
+name = "nederlandskie-janitor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+nederlandskie-core = { path = "../../core" }
+anyhow = "1.0.86"
+async-trait = "0.1.81"
+chrono = "0.4.38"
+env_logger = "0.11.5"
+log = "0.4.22"
+tokio = { version = "1.41.1", features = ["full"] }

@@ -99,6 +99,20 @@ impl Database {
         .map(|result| result.rows_affected() > 0)?)
     }
 
+    pub async fn delete_old_posts(&self, earlier_than: &DateTime<Utc>) -> Result<u64> {
+        let mut params = Parameters::new();
+
+        Ok(query(
+            &delete_from("Post")
+                .where_(format!("indexed_at < {}", params.next()))
+                .to_string(),
+        )
+        .bind(earlier_than)
+        .execute(&self.connection_pool)
+        .await
+        .map(|result| result.rows_affected())?)
+    }
+
     pub async fn insert_profile_if_it_doesnt_exist(&self, did: &str) -> Result<bool> {
         let mut params = Parameters::new();
 

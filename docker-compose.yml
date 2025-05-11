@@ -29,8 +29,6 @@ services:
     links:
       - db
   post-indexer:
-    build:
-      context: .
     command: '/bin/nederlandskie-post-indexer'
     image: nederlandskie
     depends_on:
@@ -42,8 +40,6 @@ services:
     links:
       - db
   profile-classifier:
-    build:
-      context: .
     command: '/bin/nederlandskie-profile-classifier'
     image: nederlandskie
     depends_on:
@@ -51,6 +47,17 @@ services:
     networks:
       - backend
 
+    volumes:
+      - ./.env:/app/.env
+    links:
+      - db
+  janitor:
+    command: '/bin/nederlandskie-janitor'
+    image: nederlandskie
+    depends_on:
+      - db
+    networks:
+      - backend
     volumes:
       - ./.env:/app/.env
     links:

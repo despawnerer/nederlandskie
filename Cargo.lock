@@ -2479,6 +2479,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "nederlandskie-janitor"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "env_logger",
+ "log",
+ "nederlandskie-core",
+ "tokio",
+]
+
+[[package]]
 name = "nederlandskie-post-indexer"
 version = "0.1.0"
 dependencies = [
