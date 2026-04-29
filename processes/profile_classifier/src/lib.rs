@@ -1,4 +1,3 @@
-use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::{Context, Result};
@@ -7,13 +6,13 @@ use log::{error, info};
 use nederlandskie_core::services::{Bluesky, Database, AI};
 
 pub struct ProfileClassifier {
-    database: Arc<Database>,
-    ai: Arc<AI>,
-    bluesky: Arc<Bluesky>,
+    database: Database,
+    ai: AI,
+    bluesky: Bluesky,
 }
 
 impl ProfileClassifier {
-    pub fn new(database: Arc<Database>, ai: Arc<AI>, bluesky: Arc<Bluesky>) -> Self {
+    pub fn new(database: Database, ai: AI, bluesky: Bluesky) -> Self {
         Self {
             database,
             ai,

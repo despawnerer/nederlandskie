@@ -1,7 +1,5 @@
 extern crate nederlandskie_profile_classifier;
 
-use std::sync::Arc;
-
 use anyhow::Result;
 use env_logger::Env;
 use log::info;
@@ -17,17 +15,17 @@ async fn main() -> Result<()> {
 
     info!("Loading configuration");
 
-    let config = Arc::new(Config::load()?);
+    let config = Config::load()?;
 
     info!("Initializing service clients");
 
-    let ai = Arc::new(AI::new(&config.chat_gpt_api_key, "https://api.openai.com"));
-    let bluesky = Arc::new(Bluesky::unauthenticated());
+    let ai = AI::new(&config.chat_gpt_api_key, "https://api.openai.com");
+    let bluesky = Bluesky::unauthenticated();
 
     info!("Connecting to the database");
-    let database = Arc::new(Database::connect(&config.database_url).await?);
+    let database = Database::connect(&config.database_url).await?;
 
-    let profile_classifier = ProfileClassifier::new(database.clone(), ai.clone(), bluesky.clone());
+    let profile_classifier = ProfileClassifier::new(database, ai, bluesky);
 
     info!("Starting Profile Classifier");
 

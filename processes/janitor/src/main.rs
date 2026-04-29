@@ -1,4 +1,3 @@
-use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
@@ -15,11 +14,11 @@ async fn main() -> Result<()> {
 
     info!("Loading configuration");
 
-    let config = Arc::new(Config::load()?);
+    let config = Config::load()?;
 
     info!("Connecting to the database");
 
-    let database = Arc::new(Database::connect(&config.database_url).await?);
+    let database = Database::connect(&config.database_url).await?;
 
     loop {
         let now: DateTime<Utc> = Utc::now();

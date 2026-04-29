@@ -15,17 +15,17 @@ use nederlandskie_core::services::Database;
 
 pub struct PostIndexer {
     database: Arc<Database>,
-    bluesky: Arc<Bluesky>,
-    indexers: Arc<Indexers>,
-    config: Arc<Config>,
+    bluesky: Bluesky,
+    indexers: Indexers,
+    config: Config,
 }
 
 impl PostIndexer {
     pub fn new(
         database: Arc<Database>,
-        bluesky: Arc<Bluesky>,
-        indexers: Arc<Indexers>,
-        config: Arc<Config>,
+        bluesky: Bluesky,
+        indexers: Indexers,
+        config: Config,
     ) -> Self {
         Self {
             database,

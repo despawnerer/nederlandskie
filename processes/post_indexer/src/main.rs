@@ -18,11 +18,11 @@ async fn main() -> Result<()> {
 
     info!("Loading configuration");
 
-    let config = Arc::new(Config::load()?);
+    let config = Config::load()?;
 
     info!("Initializing service clients");
 
-    let bluesky = Arc::new(Bluesky::unauthenticated());
+    let bluesky = Bluesky::unauthenticated();
     let database = Arc::new(Database::connect(&config.database_url).await?);
 
     info!("Initializing language detector");
@@ -33,17 +33,9 @@ async fn main() -> Result<()> {
             .build(),
     );
 
-    let indexers = Arc::new(initialize_all_indexers(
-        language_detector.clone(),
-        database.clone(),
-    ));
+    let indexers = initialize_all_indexers(language_detector.clone(), database.clone());
 
-    let post_indexer = PostIndexer::new(
-        database.clone(),
-        bluesky.clone(),
-        indexers.clone(),
-        config.clone(),
-    );
+    let post_indexer = PostIndexer::new(database.clone(), bluesky, indexers, config);
 
     info!("Starting Post Indexer");
 
