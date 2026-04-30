@@ -27,6 +27,7 @@ impl ProfileClassifier {
 
         loop {
             if let Err(e) = self.classify_unclassified_profiles().await {
+                metrics::profiles_classification_failed("fetch_profiles");
                 error!("Problem with classifying profiles: {}", e)
             }
 
@@ -64,6 +65,7 @@ impl ProfileClassifier {
             .bluesky
             .fetch_profile_details(did)
             .await
+            .inspect_err(|_| metrics::profiles_classification_failed("fetch_profile"))
             .context("Could not fetch profile details")?;
 
         let country = match details {
@@ -71,11 +73,15 @@ impl ProfileClassifier {
                 .ai
                 .infer_country_of_living(&details.display_name, &details.description)
                 .await
+                .inspect_err(|_| metrics::profiles_classification_failed("infer_country"))
                 .context("Could not infer country of living")?,
             None => "xx".to_owned(),
         };
 
-        self.database.store_profile_details(did, &country).await?;
+        self.database
+            .store_profile_details(did, &country)
+            .await
+            .inspect_err(|_| metrics::profiles_classification_failed("store_profile"))?;
         info!("Stored inferred country of living for {did}: {country}");
         Ok(())
     }
