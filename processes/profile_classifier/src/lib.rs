@@ -5,7 +5,7 @@ use std::time::Duration;
 use anyhow::{Context, Result};
 use log::{error, info};
 
-use nederlandskie_core::services::{Bluesky, Database, AI};
+use nederlandskie_core::services::{AI, Bluesky, Database};
 
 pub struct ProfileClassifier {
     database: Database,

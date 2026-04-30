@@ -6,7 +6,7 @@ use log::info;
 use metrics_exporter_prometheus::PrometheusBuilder;
 
 use nederlandskie_core::config::Config;
-use nederlandskie_core::services::{Bluesky, Database, AI};
+use nederlandskie_core::services::{AI, Bluesky, Database};
 
 use nederlandskie_profile_classifier::ProfileClassifier;
 

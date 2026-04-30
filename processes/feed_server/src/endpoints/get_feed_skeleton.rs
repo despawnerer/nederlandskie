@@ -6,8 +6,8 @@ use atrium_api::app::bsky::feed::get_feed_skeleton::{
     OutputData as FeedSkeleton, ParametersData as FeedSkeletonQuery,
 };
 use atrium_api::types::{LimitedNonZeroU8, Object};
-use axum::extract::{Query, State};
 use axum::Json;
+use axum::extract::{Query, State};
 use chrono::{DateTime, TimeZone, Utc};
 
 use crate::errors::AppError;

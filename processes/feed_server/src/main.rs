@@ -8,7 +8,7 @@ use log::info;
 
 use nederlandskie_core::config::Config;
 use nederlandskie_core::services::Database;
-use nederlandskie_feed_server::{feeds::initialize_all_feeds, FeedServer};
+use nederlandskie_feed_server::{FeedServer, feeds::initialize_all_feeds};
 
 #[tokio::main]
 async fn main() -> Result<()> {

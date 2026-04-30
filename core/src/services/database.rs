@@ -1,11 +1,11 @@
 use anyhow::Result;
 use chrono::{DateTime, Utc};
 use scooby::postgres::{
-    delete_from, insert_into, select, update, Aliasable, Joinable, Orderable, Parameters,
+    Aliasable, Joinable, Orderable, Parameters, delete_from, insert_into, select, update,
 };
+use sqlx::Row;
 use sqlx::postgres::{PgPool, PgPoolOptions, PgRow};
 use sqlx::query;
-use sqlx::Row;
 
 pub struct Post {
     pub indexed_at: DateTime<Utc>,

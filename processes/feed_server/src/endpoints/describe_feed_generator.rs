@@ -4,7 +4,7 @@ use atrium_api::app::bsky::feed::describe_feed_generator::{
     FeedData, OutputData as FeedGeneratorDescription,
 };
 use atrium_api::types::Object;
-use axum::{extract::State, Json};
+use axum::{Json, extract::State};
 
 use nederlandskie_core::config::Config;
 

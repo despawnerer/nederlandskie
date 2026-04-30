@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use anyhow::Result;
-use axum::routing::get;
 use axum::Router;
+use axum::routing::get;
 use axum_prometheus::PrometheusMetricLayer;
 use log::info;
 

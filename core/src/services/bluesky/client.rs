@@ -3,7 +3,7 @@ use std::matches;
 use std::time::Duration;
 
 use anyhow::Result;
-use atrium_api::agent::atp_agent::{store::MemorySessionStore, AtpAgent};
+use atrium_api::agent::atp_agent::{AtpAgent, store::MemorySessionStore};
 use atrium_api::types::string::Datetime;
 use atrium_api::types::{BlobRef, Collection, Object, TryIntoUnknown};
 use atrium_xrpc_client::reqwest::ReqwestClient;
@@ -13,7 +13,7 @@ use tokio_stream::StreamExt;
 use tokio_tungstenite::{connect_async, tungstenite};
 
 use super::entities::ProfileDetails;
-use super::streaming::{handle_message, CommitProcessor};
+use super::streaming::{CommitProcessor, handle_message};
 
 pub struct Bluesky {
     agent: AtpAgent<MemorySessionStore, ReqwestClient>,
