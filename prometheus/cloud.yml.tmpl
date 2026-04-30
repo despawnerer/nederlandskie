@@ -1,0 +1,32 @@
+global:
+  scrape_interval: 15s
+  external_labels:
+    environment: "local"
+
+remote_write:
+  - url: GRAFANA_REMOTE_WRITE_URL_PLACEHOLDER
+    basic_auth:
+      username: GRAFANA_USERNAME_PLACEHOLDER
+      password: GRAFANA_API_TOKEN_PLACEHOLDER
+    queue_config:
+      max_shards: 1
+      max_samples_per_send: 500
+      batch_send_deadline: 5s
+
+scrape_configs:
+  - job_name: feed-server
+    static_configs:
+      - targets: ["feed-server:3030"]
+    metrics_path: /metrics
+
+  - job_name: post-indexer
+    static_configs:
+      - targets: ["post-indexer:9092"]
+
+  - job_name: profile-classifier
+    static_configs:
+      - targets: ["profile-classifier:9093"]
+
+  - job_name: janitor
+    static_configs:
+      - targets: ["janitor:9094"]

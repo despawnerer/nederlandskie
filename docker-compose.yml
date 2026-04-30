@@ -78,10 +78,26 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
+    entrypoint:
+      - sh
+      - -c
+      - |
+        if [ -n "$$GRAFANA_REMOTE_WRITE_URL" ]; then
+          sed -e "s|GRAFANA_REMOTE_WRITE_URL_PLACEHOLDER|$$GRAFANA_REMOTE_WRITE_URL|g" \
+              -e "s|GRAFANA_USERNAME_PLACEHOLDER|$$GRAFANA_USERNAME|g" \
+              -e "s|GRAFANA_API_TOKEN_PLACEHOLDER|$$GRAFANA_API_TOKEN|g" \
+              /etc/prometheus/prometheus.cloud.yml.tmpl > /tmp/prometheus.yml &&
+          exec /bin/prometheus --config.file=/tmp/prometheus.yml
+        else
+          exec /bin/prometheus --config.file=/etc/prometheus/prometheus.local.yml
+        fi
+    environment:
+      - GRAFANA_REMOTE_WRITE_URL
+      - GRAFANA_USERNAME
+      - GRAFANA_API_TOKEN
     volumes:
-      - ./prometheus/local.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/local.yml:/etc/prometheus/prometheus.local.yml:ro
+      - ./prometheus/cloud.yml.tmpl:/etc/prometheus/prometheus.cloud.yml.tmpl:ro
       - prometheus-data:/prometheus
     networks:
       - backend
