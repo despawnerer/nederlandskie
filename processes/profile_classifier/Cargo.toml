@@ -1,7 +1,8 @@
 [package]
 name = "nederlandskie-profile-classifier"
-version = "0.1.0"
-edition = "2021"
+version = "0.0.0"
+publish = false
+edition = "2024"
 
 [dependencies]
 nederlandskie-core = { path = "../../core" }

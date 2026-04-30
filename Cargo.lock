@@ -2740,7 +2740,7 @@ dependencies = [
 
 [[package]]
 name = "nederlandskie-core"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2768,7 +2768,7 @@ dependencies = [
 
 [[package]]
 name = "nederlandskie-feed-server"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2793,7 +2793,7 @@ dependencies = [
 
 [[package]]
 name = "nederlandskie-janitor"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2808,7 +2808,7 @@ dependencies = [
 
 [[package]]
 name = "nederlandskie-post-indexer"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2823,7 +2823,7 @@ dependencies = [
 
 [[package]]
 name = "nederlandskie-profile-classifier"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "anyhow",
  "env_logger",
@@ -2836,7 +2836,7 @@ dependencies = [
 
 [[package]]
 name = "nederlandskie-tools"
-version = "0.1.0"
+version = "0.0.0"
 dependencies = [
  "anyhow",
  "clap",
