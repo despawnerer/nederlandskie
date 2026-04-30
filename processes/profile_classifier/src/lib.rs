@@ -71,7 +71,10 @@ impl ProfileClassifier {
         let country = match details {
             Some(details) => self
                 .ai
-                .infer_country_of_living(&details.display_name, &details.description)
+                .infer_country_of_living(
+                    details.display_name.as_deref().unwrap_or_default(),
+                    details.description.as_deref().unwrap_or_default(),
+                )
                 .await
                 .inspect_err(|_| metrics::profiles_classification_failed("infer_country"))
                 .context("Could not infer country of living")?,

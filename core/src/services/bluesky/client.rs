@@ -12,7 +12,8 @@ use log::error;
 use tokio_stream::StreamExt;
 use tokio_tungstenite::{connect_async, tungstenite};
 
-use super::entities::ProfileDetails;
+use atrium_api::app::bsky::actor::profile::RecordData as ProfileRecordData;
+
 use super::streaming::{CommitProcessor, handle_message};
 
 pub struct Bluesky {
@@ -93,7 +94,7 @@ impl Bluesky {
         Ok(())
     }
 
-    pub async fn fetch_profile_details(&self, did: &str) -> Result<Option<ProfileDetails>> {
+    pub async fn fetch_profile_details(&self, did: &str) -> Result<Option<ProfileRecordData>> {
         use atrium_api::com::atproto::repo::get_record::ParametersData;
 
         let result = self
@@ -120,7 +121,8 @@ impl Bluesky {
             Err(e) => return Err(e.into()),
         };
 
-        Ok(Some(ProfileDetails::try_from(profile_output.data.value)?))
+        let bytes = serde_ipld_dagcbor::to_vec(&profile_output.data.value)?;
+        Ok(Some(serde_ipld_dagcbor::from_slice(&bytes)?))
     }
 
     pub async fn resolve_handle(&self, handle: &str) -> Result<Option<String>> {

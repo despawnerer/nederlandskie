@@ -2,15 +2,18 @@ use std::collections::HashMap;
 
 use anyhow::Result;
 use async_trait::async_trait;
+use atrium_api::app::bsky::feed::{Like, Post};
+use atrium_api::app::bsky::graph::Follow;
 use atrium_api::com::atproto::sync::subscribe_repos::Commit;
 use atrium_api::types::Collection;
 use chrono::{DateTime, Utc};
 
-use super::{
-    entities::{FollowRecord, LikeRecord, PostRecord},
-    internals::cbor::read_record,
-    internals::ipld::Frame,
-};
+use super::internals::cbor::read_record;
+use super::internals::ipld::Frame;
+
+pub type PostRecord = <Post as Collection>::Record;
+pub type LikeRecord = <Like as Collection>::Record;
+pub type FollowRecord = <Follow as Collection>::Record;
 
 const ACTION_CREATE: &str = "create";
 const ACTION_DELETE: &str = "delete";
