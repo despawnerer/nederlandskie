@@ -11,6 +11,7 @@ atrium-api = "0.25.8"
 atrium-xrpc = "0.12.4"
 atrium-xrpc-client = "0.5.15"
 axum = "0.8.9"
+axum-prometheus = "0.10"
 chrono = "0.4.44"
 clap = { version = "4.6.1", features = ["derive"] }
 dotenv = "0.15.0"

@@ -23,6 +23,7 @@ Published on Bluesky at https://bsky.app/profile/did:plc:376mcc6k4s5p7qbtyjrgph5
    - `ANTHROPIC_API_KEY` for your Anthropic API key (get one at https://console.anthropic.com/)
    - `DATABASE_URL` for PostgreSQL credentials
    - `FEED_GENERATOR_HOSTNAME` to the hostname of where you intend to host the feed
+   - `METRICS_ENABLED` to `false` if you wish to not collect telemetry for some reason
 
 2. Determine your own DID and put it in `PUBLISHER_DID` env variable in `.env`:
 
@@ -39,6 +40,8 @@ Published on Bluesky at https://bsky.app/profile/did:plc:376mcc6k4s5p7qbtyjrgph5
    `make run-dev`
 
    The feed will be available at http://localhost:3030/.
+
+   Collected metrics will be available in a locally running Grafana instance at http://localhost:3000/.
 
 ## Tools
 

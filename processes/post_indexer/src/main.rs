@@ -6,6 +6,7 @@ use anyhow::Result;
 use env_logger::Env;
 use lingua::LanguageDetectorBuilder;
 use log::info;
+use metrics_exporter_prometheus::PrometheusBuilder;
 
 use nederlandskie_core::config::Config;
 use nederlandskie_core::services::{Bluesky, Database};
@@ -19,6 +20,13 @@ async fn main() -> Result<()> {
     info!("Loading configuration");
 
     let config = Config::load()?;
+
+    if config.metrics_enabled {
+        PrometheusBuilder::new()
+            .with_http_listener(([0, 0, 0, 0], 9092))
+            .install()
+            .expect("failed to install metrics exporter");
+    }
 
     info!("Initializing service clients");
 

@@ -3,6 +3,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use axum::routing::get;
 use axum::Router;
+use axum_prometheus::PrometheusMetricLayer;
 use log::info;
 
 use nederlandskie_core::config::Config;
@@ -28,7 +29,7 @@ impl FeedServer {
     }
 
     pub async fn serve(self) -> Result<()> {
-        let app = Router::new()
+        let mut app = Router::new()
             .route("/", get(root))
             .route("/.well-known/did.json", get(did_json))
             .route(
@@ -41,9 +42,19 @@ impl FeedServer {
             )
             .with_state(FeedServerState {
                 database: self.database,
-                config: self.config,
+                config: self.config.clone(),
                 feeds: self.feeds,
             });
+
+        if self.config.metrics_enabled {
+            let (prometheus_layer, metrics_handle) = PrometheusMetricLayer::pair();
+            app = app
+                .route(
+                    "/metrics",
+                    get(move || async move { metrics_handle.render() }),
+                )
+                .layer(prometheus_layer);
+        }
 
         let addr = "0.0.0.0:3030";
         info!("Serving feed on {}", addr);

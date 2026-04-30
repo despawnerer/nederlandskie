@@ -9,6 +9,7 @@ pub struct Config {
     pub feed_generator_did: Did,
     pub publisher_did: Did,
     pub feed_generator_hostname: String,
+    pub metrics_enabled: bool,
 }
 
 impl Config {
@@ -25,6 +26,9 @@ impl Config {
             publisher_did: env::var("PUBLISHER_DID")?
                 .parse()
                 .map_err(anyhow::Error::msg)?,
+            metrics_enabled: env::var("METRICS_ENABLED")
+                .map(|v| v != "false")
+                .unwrap_or(true),
         })
     }
 }

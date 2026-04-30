@@ -1,3 +1,5 @@
+pub mod metrics;
+
 use std::time::Duration;
 
 use anyhow::{Context, Result};
@@ -37,13 +39,18 @@ impl ProfileClassifier {
 
         let dids = self.database.fetch_unprocessed_profile_dids().await?;
 
+        metrics::profiles_pending(dids.len());
+
         if dids.is_empty() {
             info!("No profiles to process");
         } else {
             info!("Classifying {} new profiles", dids.len());
             for did in &dids {
                 match self.fill_in_profile_details(did).await {
-                    Ok(()) => continue,
+                    Ok(()) => {
+                        metrics::profiles_classified();
+                        continue;
+                    }
                     Err(e) => error!("Could not classify profile with did {}: {:?}", did, e),
                 }
             }

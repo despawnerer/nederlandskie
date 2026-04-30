@@ -4,6 +4,7 @@ use anyhow::Result;
 use chrono::{DateTime, TimeDelta, Utc};
 use env_logger::Env;
 use log::info;
+use metrics_exporter_prometheus::PrometheusBuilder;
 
 use nederlandskie_core::config::Config;
 use nederlandskie_core::services::Database;
@@ -15,6 +16,13 @@ async fn main() -> Result<()> {
     info!("Loading configuration");
 
     let config = Config::load()?;
+
+    if config.metrics_enabled {
+        PrometheusBuilder::new()
+            .with_http_listener(([0, 0, 0, 0], 9094))
+            .install()
+            .expect("failed to install metrics exporter");
+    }
 
     info!("Connecting to the database");
 
@@ -29,6 +37,7 @@ async fn main() -> Result<()> {
         let deleted_posts = database.delete_old_posts(&earlier_than).await?;
 
         if deleted_posts > 0 {
+            metrics::counter!("posts_janitor_deleted_total").increment(deleted_posts as u64);
             info!("Deleted {}", deleted_posts);
         } else {
             info!("No posts to delete, waiting...");

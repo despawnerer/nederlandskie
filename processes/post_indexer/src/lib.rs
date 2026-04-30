@@ -1,4 +1,5 @@
 pub mod indexers;
+pub mod metrics;
 
 use std::sync::Arc;
 use std::time::Duration;
@@ -72,6 +73,8 @@ impl PostIndexer {
 #[async_trait]
 impl CommitProcessor for PostIndexer {
     async fn process_commit(&self, commit: &CommitDetails) -> Result<()> {
+        metrics::messages_received();
+
         for operation in &commit.operations {
             match operation {
                 Operation::CreatePost {
@@ -80,6 +83,8 @@ impl CommitProcessor for PostIndexer {
                     uri,
                     post,
                 } => {
+                    metrics::messages_of_interest();
+
                     for indexer in self.indexers.iter_all() {
                         if indexer.should_index_post(author_did, post).await? {
                             info!("Received insertable post from {author_did}: {post:?}",);
@@ -90,14 +95,20 @@ impl CommitProcessor for PostIndexer {
 
                             self.database.insert_post(author_did, cid, uri).await?;
 
+                            metrics::posts_indexed();
+
                             break;
                         }
                     }
                 }
                 Operation::DeletePost { uri } => {
+                    metrics::messages_of_interest();
+
                     info!("Received a post to delete: {uri}");
 
-                    self.database.delete_post(uri).await?;
+                    if self.database.delete_post(uri).await? {
+                        metrics::posts_deleted();
+                    }
                 }
                 _ => continue,
             }
