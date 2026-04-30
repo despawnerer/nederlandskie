@@ -74,11 +74,20 @@ impl AI {
 
         let response = response.json::<AnthropicResponse>().await?;
 
-        response
+        let country = response
             .content
             .into_iter()
             .find(|b| b.kind == "text")
             .map(|b| b.text.trim().to_lowercase())
-            .ok_or_else(|| anyhow!("No text content received from Claude"))
+            .ok_or_else(|| anyhow!("No text content received from Claude"))?;
+
+        if country.len() != 2 {
+            return Err(anyhow!(
+                "Claude returned an invalid country code (expected 2 letters, got {:?})",
+                country
+            ));
+        }
+
+        Ok(country)
     }
 }
