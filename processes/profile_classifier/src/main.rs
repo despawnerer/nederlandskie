@@ -19,7 +19,7 @@ async fn main() -> Result<()> {
 
     info!("Initializing service clients");
 
-    let ai = AI::new(&config.chat_gpt_api_key, "https://api.openai.com");
+    let ai = AI::new(&config.anthropic_api_key);
     let bluesky = Bluesky::unauthenticated();
 
     info!("Connecting to the database");

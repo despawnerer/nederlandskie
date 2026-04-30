@@ -1,14 +1,43 @@
 use anyhow::{anyhow, Result};
-use chat_gpt_lib_rs::{ChatGPTClient, ChatInput, Message, Model, Role};
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
 
 pub struct AI {
-    chat_gpt_client: ChatGPTClient,
+    client: Client,
+    api_key: String,
+}
+
+#[derive(Serialize)]
+struct RequestMessage {
+    role: &'static str,
+    content: String,
+}
+
+#[derive(Serialize)]
+struct AnthropicRequest {
+    model: &'static str,
+    max_tokens: u32,
+    system: &'static str,
+    messages: Vec<RequestMessage>,
+}
+
+#[derive(Deserialize)]
+struct ContentBlock {
+    #[serde(rename = "type")]
+    kind: String,
+    text: String,
+}
+
+#[derive(Deserialize)]
+struct AnthropicResponse {
+    content: Vec<ContentBlock>,
 }
 
 impl AI {
-    pub fn new(api_key: &str, base_url: &str) -> Self {
+    pub fn new(api_key: &str) -> Self {
         Self {
-            chat_gpt_client: ChatGPTClient::new(api_key, base_url),
+            client: Client::new(),
+            api_key: api_key.to_string(),
         }
     }
 
@@ -17,28 +46,39 @@ impl AI {
         display_name: &str,
         description: &str,
     ) -> Result<String> {
-        let chat_input = ChatInput {
-            model: Model::Gpt3_5Turbo,
-            messages: vec![
-                Message {
-                    role: Role::System,
-                    // TODO: Lol, prompt injection much?
-                    content: "You are a tool that attempts to guess where a person is likely to be from based on their name and short bio. Please respond with two-letter country code only. If unable to determine, say xx.".to_string(),
-                },
-                Message {
-                    role: Role::User,
-                    content: format!("Name: {display_name}\nBio:\n{description}"),
-                },
-            ],
-            ..Default::default()
+        let request = AnthropicRequest {
+            model: "claude-haiku-4-5-20251001",
+            max_tokens: 10,
+            // TODO: Lol, prompt injection much?
+            system: "You are a tool that attempts to guess where a person is likely to be from based on their name and short bio. Please respond with two-letter country code only. If unable to determine, say xx.",
+            messages: vec![RequestMessage {
+                role: "user",
+                content: format!("Name: {display_name}\nBio:\n{description}"),
+            }],
         };
 
-        let response = self.chat_gpt_client.chat(chat_input).await?;
+        let response = self
+            .client
+            .post("https://api.anthropic.com/v1/messages")
+            .header("x-api-key", &self.api_key)
+            .header("anthropic-version", "2023-06-01")
+            .json(&request)
+            .send()
+            .await?;
+
+        if !response.status().is_success() {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            return Err(anyhow!("Anthropic API error {status}: {body}"));
+        }
+
+        let response = response.json::<AnthropicResponse>().await?;
 
         response
-            .choices
-            .first()
-            .map(|choice| choice.message.content.to_lowercase())
-            .ok_or_else(|| anyhow!("No choices received from ChatGPT, weird"))
+            .content
+            .into_iter()
+            .find(|b| b.kind == "text")
+            .map(|b| b.text.trim().to_lowercase())
+            .ok_or_else(|| anyhow!("No text content received from Claude"))
     }
 }

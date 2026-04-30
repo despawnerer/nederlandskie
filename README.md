@@ -6,7 +6,7 @@ The specific algorithm indexes and serves posts written in Russian language, by 
 
 - Posts are stored in PostgreSQL via [`sqlx`](https://crates.io/crates/sqlx) and [`scooby`](https://crates.io/crates/scooby)
 - Language of posts is determined via [`lingua-rs`](https://crates.io/crates/lingua)
-- Country of residence is inferred from profile information through ChatGPT via [`chat-gpt-lib-rs`](https://crates.io/crates/chat-gpt-lib-rs)
+- Country of residence is inferred from profile information through Claude (Haiku) via the [Anthropic Messages API](https://docs.anthropic.com/en/api/messages)
 - Feed is served via [`axum`](https://crates.io/crates/axum)
 - Intefacing with Bluesky is implemented using [`atrium-api`](https://crates.io/crates/atrium-api)
 
@@ -20,7 +20,7 @@ Published on Bluesky at https://bsky.app/profile/did:plc:376mcc6k4s5p7qbtyjrgph5
 
    - `PUBLISHER_BLUESKY_HANDLE` to your Bluesky handle
    - `PUBLISHER_BLUESKY_PASSWORD` to Bluesky app password that you created in settings
-   - `CHAT_GPT_API_KEY` for your ChatGPT key
+   - `ANTHROPIC_API_KEY` for your Anthropic API key (get one at https://console.anthropic.com/)
    - `DATABASE_URL` for PostgreSQL credentials
    - `FEED_GENERATOR_HOSTNAME` to the hostname of where you intend to host the feed
 
