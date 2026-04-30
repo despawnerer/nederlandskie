@@ -201,26 +201,18 @@ where
     )
 }
 
-fn is_record_not_found_error<T>(error: &atrium_xrpc::error::Error<T>) -> bool
-where
-    T: Debug,
-{
-    use atrium_xrpc::error::{Error, ErrorResponseBody, XrpcError, XrpcErrorKind};
+fn is_record_not_found_error(
+    error: &atrium_xrpc::error::Error<atrium_api::com::atproto::repo::get_record::Error>,
+) -> bool {
+    use atrium_api::com::atproto::repo::get_record::Error as GetRecordError;
+    use atrium_xrpc::error::{Error, XrpcError, XrpcErrorKind};
 
-    matches!(error,
+    matches!(
+        error,
         Error::XrpcResponse(XrpcError {
-            status,
-            error:
-                Some(XrpcErrorKind::Undefined(ErrorResponseBody {
-                    error: Some(error_code),
-                    message: Some(error_message),
-                })),
-        }) if
-            // FIXME: This is this way instead of pattern matching because atrium's
-            //        version of http is pegged at like 0.2.x and it does not
-            //        re-export it so we have no way of referencing the real type
-            status.as_u16() == StatusCode::BAD_REQUEST.as_u16()
-            && error_code == "RecordNotFound"
+            error: Some(XrpcErrorKind::Custom(GetRecordError::RecordNotFound(_))),
+            ..
+        })
     )
 }
 
