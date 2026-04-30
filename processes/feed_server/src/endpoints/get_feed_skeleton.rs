@@ -51,7 +51,11 @@ pub async fn get_feed_skeleton(
 
     let cursor = posts.last().map(|p| make_cursor(&p.indexed_at, &p.cid));
 
-    Ok(Json(FeedSkeleton { cursor, feed }))
+    Ok(Json(FeedSkeleton {
+        cursor,
+        feed,
+        req_id: None,
+    }))
 }
 
 fn make_cursor(date: &DateTime<Utc>, cid: &str) -> String {

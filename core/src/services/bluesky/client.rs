@@ -3,7 +3,7 @@ use std::matches;
 use std::time::Duration;
 
 use anyhow::Result;
-use atrium_api::agent::{store::MemorySessionStore, AtpAgent};
+use atrium_api::agent::atp_agent::{store::MemorySessionStore, AtpAgent};
 use atrium_api::types::string::Datetime;
 use atrium_api::types::{BlobRef, Collection, Object, TryIntoUnknown};
 use atrium_xrpc_client::reqwest::ReqwestClient;
@@ -77,10 +77,11 @@ impl Bluesky {
                         display_name: display_name.to_owned(),
                         labels: None,
                         accepts_interactions: None,
+                        content_mode: None,
                     }
                     .try_into_unknown()?,
                     repo: publisher_did.parse().map_err(anyhow::Error::msg)?,
-                    rkey: name.to_owned(),
+                    rkey: name.parse().map_err(anyhow::Error::msg)?,
                     swap_commit: None,
                     swap_record: None,
                     validate: None,
@@ -106,7 +107,7 @@ impl Bluesky {
                     collection: atrium_api::app::bsky::actor::Profile::nsid(),
                     cid: None,
                     repo: did.parse().map_err(anyhow::Error::msg)?,
-                    rkey: "self".to_owned(),
+                    rkey: "self".parse().map_err(anyhow::Error::msg)?,
                 }
                 .into(),
             )
