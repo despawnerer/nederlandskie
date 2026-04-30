@@ -49,10 +49,10 @@ impl ProfileClassifier {
                 match self.fill_in_profile_details(did).await {
                     Ok(()) => {
                         metrics::profiles_classified();
-                        continue;
                     }
                     Err(e) => error!("Could not classify profile with did {}: {:?}", did, e),
                 }
+                tokio::time::sleep(Duration::from_secs(1)).await;
             }
         }
 
