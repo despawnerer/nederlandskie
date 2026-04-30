@@ -13,11 +13,12 @@ services:
     volumes:
       - ./sql:/docker-entrypoint-initdb.d
       - db:/var/lib/postgresql/data
+
   feed-server:
     build:
       context: .
-    command: '/bin/nederlandskie-feed-server'
-    image: nederlandskie
+      target: dev
+    command: cargo watch -x 'run --bin nederlandskie-feed-server'
     depends_on:
       - db
     ports:
@@ -25,49 +26,62 @@ services:
     networks:
       - backend
     volumes:
-      - ./.env:/app/.env
-    links:
-      - db
+      - .:/app
+      - cargo-registry:/usr/local/cargo/registry
+      - cargo-git:/usr/local/cargo/git
+      - target:/app/target
+
   post-indexer:
-    command: '/bin/nederlandskie-post-indexer'
-    image: nederlandskie
+    build:
+      context: .
+      target: dev
+    command: cargo watch -x 'run --bin nederlandskie-post-indexer'
     depends_on:
       - db
     networks:
       - backend
     volumes:
-      - ./.env:/app/.env
-    links:
-      - db
+      - .:/app
+      - cargo-registry:/usr/local/cargo/registry
+      - cargo-git:/usr/local/cargo/git
+      - target:/app/target
+
   profile-classifier:
-    command: '/bin/nederlandskie-profile-classifier'
-    image: nederlandskie
+    build:
+      context: .
+      target: dev
+    command: cargo watch -x 'run --bin nederlandskie-profile-classifier'
     depends_on:
       - db
     networks:
       - backend
-
     volumes:
-      - ./.env:/app/.env
-    links:
-      - db
+      - .:/app
+      - cargo-registry:/usr/local/cargo/registry
+      - cargo-git:/usr/local/cargo/git
+      - target:/app/target
+
   janitor:
-    command: '/bin/nederlandskie-janitor'
-    image: nederlandskie
+    build:
+      context: .
+      target: dev
+    command: cargo watch -x 'run --bin nederlandskie-janitor'
     depends_on:
       - db
     networks:
       - backend
     volumes:
-      - ./.env:/app/.env
-    links:
-      - db
-
+      - .:/app
+      - cargo-registry:/usr/local/cargo/registry
+      - cargo-git:/usr/local/cargo/git
+      - target:/app/target
 
 networks:
   backend:
 
-
 volumes:
   db:
     driver: local
+  cargo-registry:
+  cargo-git:
+  target:

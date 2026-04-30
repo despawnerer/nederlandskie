@@ -1,27 +1,20 @@
-# FIXME: Use mariner once they support the latest Rust.
-# FROM mcr.microsoft.com/cbl-mariner/base/rust:1 as builder
-FROM rust:1-bullseye AS builder
+FROM rust:1-bookworm AS dev
+RUN cargo install cargo-watch
+WORKDIR /app
 
-COPY Cargo.lock /build/
-COPY Cargo.toml /build/
-COPY core /build/core
-COPY processes /build/processes
-COPY tools /build/tools
-
-# Build the default page
+FROM rust:1-bookworm AS builder
 WORKDIR /build
+COPY Cargo.lock ./
+COPY Cargo.toml ./
+COPY core ./core
+COPY processes ./processes
+COPY tools ./tools
+RUN cargo build --release
+RUN mkdir -p /bin && mv target/release/nederlandskie-* /bin/
 
-RUN cargo build
-RUN mkdir -p /bin && mv target/debug/nederlandskie-* /bin/
-
-# FROM mcr.microsoft.com/cbl-mariner/distroless/base:2.0
-FROM debian:bullseye-slim
-
-RUN apt-get update && apt-get install -y ca-certificates
+FROM debian:bookworm-slim
+RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN update-ca-certificates
-
 COPY --from=builder /bin /bin
-COPY .env /bin
-
 WORKDIR /bin
 EXPOSE 8000
