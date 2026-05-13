@@ -804,7 +804,7 @@
             "type": "prometheus",
             "uid": "prometheuslocal"
           },
-          "expr": "increase(axum_http_requests_total[1m])",
+          "expr": "sum by (method, endpoint, status) (increase(axum_http_requests_total[1m]))",
           "legendFormat": "{{method}} {{endpoint}} {{status}}",
           "refId": "A"
         }
@@ -903,21 +903,12 @@
             "type": "prometheus",
             "uid": "prometheuslocal"
           },
-          "expr": "histogram_quantile(0.95, rate(axum_http_requests_duration_seconds_bucket[5m]))",
-          "legendFormat": "p95",
+          "expr": "histogram_quantile(0.95, sum by (le, method, endpoint) (rate(axum_http_requests_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{method}} {{endpoint}}",
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheuslocal"
-          },
-          "expr": "histogram_quantile(0.50, rate(axum_http_requests_duration_seconds_bucket[5m]))",
-          "legendFormat": "p50",
-          "refId": "B"
         }
       ],
-      "title": "HTTP latency (p50 / p95)",
+      "title": "HTTP latency p95",
       "type": "timeseries"
     },
     {
