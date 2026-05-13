@@ -3,7 +3,7 @@ use std::sync::Arc;
 use anyhow::Result;
 use axum::Router;
 use axum::routing::get;
-use axum_prometheus::PrometheusMetricLayer;
+use axum_prometheus::{EndpointLabel, PrometheusMetricLayerBuilder};
 use log::info;
 
 use nederlandskie_core::config::Config;
@@ -47,7 +47,13 @@ impl FeedServer {
             });
 
         if self.config.metrics_enabled {
-            let (prometheus_layer, metrics_handle) = PrometheusMetricLayer::pair();
+            let (prometheus_layer, metrics_handle) = PrometheusMetricLayerBuilder::new()
+                .with_endpoint_label_type(EndpointLabel::MatchedPathWithFallbackFn(|_| {
+                    "<unmatched>".to_owned()
+                }))
+                .with_ignore_pattern("<unmatched>")
+                .with_default_metrics()
+                .build_pair();
             app = app
                 .route(
                     "/metrics",
