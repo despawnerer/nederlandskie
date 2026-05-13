@@ -25,18 +25,25 @@ impl Database {
         })
     }
 
-    pub async fn insert_post(&self, author_did: &str, cid: &str, uri: &str) -> Result<()> {
+    pub async fn insert_post(
+        &self,
+        author_did: &str,
+        cid: &str,
+        uri: &str,
+        created_at: DateTime<Utc>,
+    ) -> Result<()> {
         let mut params = Parameters::new();
 
         Ok(query(
             &insert_into("Post")
-                .columns(("author_did", "cid", "uri"))
+                .columns(("author_did", "cid", "uri", "created_at"))
                 .values([params.next_array()])
                 .to_string(),
         )
         .bind(author_did)
         .bind(cid)
         .bind(uri)
+        .bind(created_at)
         .execute(&self.connection_pool)
         .await
         .map(|_| ())?)

@@ -10,6 +10,8 @@ use log::{debug, error, info};
 
 use indexers::Indexers;
 
+use chrono::Utc;
+
 use nederlandskie_core::config::Config;
 use nederlandskie_core::services::bluesky::{Bluesky, CommitDetails, CommitProcessor, Operation};
 use nederlandskie_core::services::Database;
@@ -93,7 +95,10 @@ impl CommitProcessor for PostIndexer {
                                 .insert_profile_if_it_doesnt_exist(author_did)
                                 .await?;
 
-                            self.database.insert_post(author_did, cid, uri).await?;
+                            let created_at = post.created_at.as_ref().with_timezone(&Utc);
+                            self.database
+                                .insert_post(author_did, cid, uri, created_at)
+                                .await?;
 
                             metrics::posts_indexed();
 

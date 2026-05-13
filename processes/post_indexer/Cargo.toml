@@ -7,6 +7,7 @@ edition = "2021"
 [dependencies]
 nederlandskie-core = { path = "../../core" }
 anyhow = "1.0.102"
+chrono = "0.4.44"
 async-trait = "0.1.89"
 env_logger = "0.11.10"
 lingua = "1.8.0"
