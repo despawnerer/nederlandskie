@@ -49,7 +49,7 @@ pub async fn get_feed_skeleton(
         .map(Object::from)
         .collect();
 
-    let cursor = posts.last().map(|p| make_cursor(&p.indexed_at, &p.cid));
+    let cursor = posts.last().map(|p| make_cursor(&p.created_at, &p.cid));
 
     Ok(Json(FeedSkeleton {
         cursor,
@@ -65,7 +65,7 @@ fn make_cursor(date: &DateTime<Utc>, cid: &str) -> String {
 fn parse_cursor(cursor: &str) -> anyhow::Result<(DateTime<Utc>, &str)> {
     let mut parts = cursor.split("::");
 
-    let indexed_at = parts
+    let created_at = parts
         .next()
         .ok_or_else(|| anyhow!("Malformed cursor: {cursor}"))?;
     let cid = parts
@@ -76,8 +76,8 @@ fn parse_cursor(cursor: &str) -> anyhow::Result<(DateTime<Utc>, &str)> {
         return Err(anyhow!("Malformed cursor: {cursor}"));
     }
 
-    let indexed_at: i64 = indexed_at.parse()?;
-    let indexed_at = Utc.timestamp_opt(indexed_at / 1000, 0).unwrap(); // TODO: handle error
+    let created_at: i64 = created_at.parse()?;
+    let created_at = Utc.timestamp_opt(created_at / 1000, 0).unwrap(); // TODO: handle error
 
-    Ok((indexed_at, cid))
+    Ok((created_at, cid))
 }

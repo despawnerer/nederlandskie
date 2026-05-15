@@ -8,7 +8,7 @@ use sqlx::postgres::{PgPool, PgPoolOptions, PgRow};
 use sqlx::query;
 
 pub struct Post {
-    pub indexed_at: DateTime<Utc>,
+    pub created_at: DateTime<Utc>,
     pub author_did: String,
     pub cid: String,
     pub uri: String,
@@ -56,7 +56,7 @@ impl Database {
         earlier_than: Option<(DateTime<Utc>, &str)>,
     ) -> Result<Vec<Post>> {
         let mut params = Parameters::new();
-        let mut sql_builder = select(("p.indexed_at", "p.author_did", "p.cid", "p.uri"))
+        let mut sql_builder = select(("p.created_at", "p.author_did", "p.cid", "p.uri"))
             .from(
                 "Post"
                     .as_("p")
@@ -64,12 +64,12 @@ impl Database {
                     .on("pr.did = p.author_did"),
             )
             .where_(format!("pr.likely_country_of_living = {}", params.next()))
-            .order_by(("p.indexed_at".desc(), "p.cid".desc()))
+            .order_by(("p.created_at".desc(), "p.cid".desc()))
             .limit(limit);
 
         if earlier_than.is_some() {
             sql_builder = sql_builder
-                .where_(format!("p.indexed_at <= {}", params.next()))
+                .where_(format!("p.created_at <= {}", params.next()))
                 .where_(format!("p.cid < {}", params.next()));
         }
 
@@ -77,13 +77,13 @@ impl Database {
 
         let mut query_object = query(&sql_string).bind(author_country);
 
-        if let Some((last_indexed_at, last_cid)) = earlier_than {
-            query_object = query_object.bind(last_indexed_at).bind(last_cid);
+        if let Some((last_created_at, last_cid)) = earlier_than {
+            query_object = query_object.bind(last_created_at).bind(last_cid);
         }
 
         Ok(query_object
             .map(|r: PgRow| Post {
-                indexed_at: r.get("indexed_at"),
+                created_at: r.get("created_at"),
                 author_did: r.get("author_did"),
                 cid: r.get("cid"),
                 uri: r.get("uri"),
