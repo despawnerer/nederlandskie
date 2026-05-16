@@ -7,7 +7,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=nederlandskie
     ports:
-      - '5432:5432'
+      - "5432:5432"
     networks:
       - backend
     volumes:
@@ -22,7 +22,7 @@ services:
     depends_on:
       - db
     ports:
-      - 8000:8000
+      - "3030:3030"
     networks:
       - backend
     volumes:
