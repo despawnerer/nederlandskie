@@ -1,0 +1,101 @@
+<!doctype html>
+<title>Nederlandskie</title>
+<meta charset="utf-8" />
+<meta
+    name="viewport"
+    content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes"
+/>
+<style>
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        padding: 0;
+        margin: 30px;
+        font-size: 16px;
+        line-height: 1.5;
+        background: white;
+        color: #222;
+    }
+
+    a {
+        color: blue;
+        text-decoration: underline;
+    }
+
+    #container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    h1 {
+        font-size: 36px;
+        font-weight: bold;
+        margin: 30px 0 20px;
+    }
+
+    h2 {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 30px 0 20px;
+    }
+
+    p {
+        margin: 20px 0;
+    }
+
+    .stuff-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .stuff-list > li {
+        margin: 10px 0;
+    }
+
+    .stuff-number {
+        font-weight: bold;
+    }
+
+    footer {
+        margin: 30px 0 0 0;
+        font-size: 13px;
+        color: gray;
+    }
+</style>
+
+<div id="container">
+    <h1>Nederlandskie</h1>
+
+    <p>
+        A Bluesky feed of Russian-language posts from people living in the
+        Netherlands.
+    </p>
+
+    <h2>Stats</h2>
+
+    <ul class="stuff-list">
+        <li>
+            <span class="stuff-number">{{ total_posts }}</span> posts indexed
+        </li>
+        <li>
+            <span class="stuff-number">{{ nl_profiles }}</span> profiles
+            classified as living in the Netherlands
+        </li>
+    </ul>
+
+    <h2>Links</h2>
+
+    <ul class="stuff-list">
+        <li>
+            <a
+                href="https://bsky.app/profile/did:plc:376mcc6k4s5p7qbtyjrgph5k/feed/nederlandskie"
+                >View on Bluesky</a
+            >
+        </li>
+        <li>
+            <a href="https://github.com/despawnerer/nederlandskie"
+                >View on GitHub</a
+            >
+        </li>
+    </ul>
+</div>

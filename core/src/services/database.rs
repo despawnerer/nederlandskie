@@ -234,6 +234,27 @@ impl Database {
         .await?)
     }
 
+    pub async fn count_posts(&self) -> Result<i64> {
+        Ok(query(&select("COUNT(*)").from("Post").to_string())
+            .map(|r: PgRow| r.get(0))
+            .fetch_one(&self.connection_pool)
+            .await?)
+    }
+
+    pub async fn count_profiles_in_country(&self, country: &str) -> Result<i64> {
+        let mut params = Parameters::new();
+        Ok(query(
+            &select("COUNT(*)")
+                .from("Profile")
+                .where_(format!("likely_country_of_living = {}", params.next()))
+                .to_string(),
+        )
+        .bind(country)
+        .map(|r: PgRow| r.get(0))
+        .fetch_one(&self.connection_pool)
+        .await?)
+    }
+
     pub async fn fetch_subscription_cursor(&self, host: &str, did: &str) -> Result<Option<i64>> {
         let mut params = Parameters::new();
 
